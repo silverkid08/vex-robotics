@@ -8,13 +8,13 @@ description: Step-by-step checklist for adding or changing a picture piece in th
 Files: `app/js/icons.js`, `app/js/pieces.js`, `app/js/robot.js`, `app/js/sim.js`, `tests/runner.test.mjs`, `docs/03-block-reference.md`, `docs/07-kid-gui-design.md`.
 
 ## 1. Picture (`icons.js`)
-* Add `Icons.<name> = (param) => svg(...)` in a 100×100 viewBox. Rules: no text, 4 px `#1a1a1a` outlines, white or saturated fills, readable at 60 px. Parameters are shown as dots (`dotRow(n, y)`) or colour, never digits.
-* Reuse the helpers (`arrowUp`, `arcArrow(sweep, cw)`, `bumper(led, pressed)`, `magnet(on)`, `eye(color, object)`, `hourglass(n)`, `loop(n)`).
+* Add `Icons.<name> = (param) => svg(...)` in a 100×100 viewBox. Rules: no text, 4 px `#1a1a1a` outlines, white or saturated fills, readable at 60 px (pieces draw it 64 px square). Parameters are shown as colour or shape, never digits. Counts are NOT drawn in the picture: give the piece a `dots(p)` and the piece renders `Icons.dots(n)` in its own row above the picture (Infinity = wave).
+* Reuse the helpers (`arrowUp`, `arcArrow(sweep, cw)`, `turnArrow(sweep, cw)`, `bumper(led, pressed)`, `magnet(on)`, `eye(color, object)`, `hourglass()`, `loop()`).
 
 ## 2. Definition (`pieces.js`)
 ```js
 { id: 'spinDance', group: 'turn', params: [1, 2, 3], defaultParam: 1,
-  icon: (p) => Icons.spinDance(p),
+  icon: () => Icons.spinDance(), dots: (p) => p,
   run: async ({ robot, piece, signal }) => { for (let i = 0; i < piece.param; i++) await robot.turnFor(360); } }
 ```
 * `group` picks the colour family (`Groups`): move, turn, light, magnet, wait, loop. Add a new family only with a new colour and a docs/07 entry.

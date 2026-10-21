@@ -36,6 +36,33 @@ function arcArrow(sweep, cw = true, color = '#fff') {
     `<path d="${full ? fhead : head}" fill="${color}" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round"/>`;
 }
 
+// turn arrow: the robot faces up; the line starts at the bottom of the arc with a short stub (so the start is
+// obvious but it does not read as driving forward first) and bends right (cw) or left, so the arrow head ends up
+// pointing the way the robot faces after the turn (90 = sideways, 180 = back down)
+const TURN_STUB = 10;
+function turnArrow(sweep, cw = true, color = '#fff') {
+  const r = 28, cx = 50, cy = 56;
+  const rad = (d) => (d * Math.PI) / 180;
+  const start = cw ? 180 : 0; // left (cw) or right (ccw) point of the circle: the tangent there points straight up
+  const sx = cx + r * Math.cos(rad(start)), sy = cy;
+  const full = sweep >= 360;
+  // a full spin is a plain circle: it starts on the left and goes almost all the way round, the head coming back up
+  // towards its own start, so there is no stub (it would sit exactly where the head needs to be)
+  const span = full ? 300 : sweep;
+  const end = start + (cw ? span : -span);
+  const ex = cx + r * Math.cos(rad(end)), ey = cy + r * Math.sin(rad(end));
+  const large = span > 180 ? 1 : 0;
+  const sweepFlag = cw ? 1 : 0;
+  const tangent = rad(end + (cw ? 90 : -90));
+  const hx = ex + 16 * Math.cos(tangent), hy = ey + 16 * Math.sin(tangent);
+  const nx = Math.cos(rad(end)), ny = Math.sin(rad(end));
+  const head = `M${ex + nx * 12} ${ey + ny * 12} L${hx} ${hy} L${ex - nx * 12} ${ey - ny * 12} Z`;
+  const line = `M${sx} ${full ? sy : sy + TURN_STUB} L${sx} ${sy} A${r} ${r} 0 ${large} ${sweepFlag} ${ex} ${ey}`;
+  return `<path d="${line}" fill="none" stroke="#1a1a1a" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<path d="${line}" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<path d="${head}" fill="${color}" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round"/>`;
+}
+
 const bumper = (led = 'off', pressed = false) => {
   const glow = led === 'red' ? '#ff3b3b' : led === 'green' ? '#39d353' : '#cfcfcf';
   const halo = led === 'off' ? '' : `<circle cx="50" cy="42" r="40" fill="${glow}" opacity="0.35"/>`;
@@ -44,12 +71,16 @@ const bumper = (led = 'off', pressed = false) => {
     `<rect x="26" y="${top - 18}" width="48" height="${76 - top}" rx="10" fill="${glow}" stroke="#1a1a1a" stroke-width="4"/>`;
 };
 
+// magnet: the horseshoe sits in the middle; a little lightbulb below it is lit for "on" and grey for "off"
 const magnet = (on = true) => `
-  <path d="M30 20 V55 a20 20 0 0 0 40 0 V20" fill="none" stroke="#d9363e" stroke-width="16" stroke-linecap="butt"/>
-  <path d="M30 20 V38 M70 20 V38" stroke="#e8e8e8" stroke-width="16"/>
-  <path d="M30 20 V55 a20 20 0 0 0 40 0 V20" fill="none" stroke="#1a1a1a" stroke-width="4"/>
-  ${on ? '<path d="M22 86 L30 72 M50 92 L50 78 M78 86 L70 72" stroke="#ffb800" stroke-width="6" stroke-linecap="round"/>' :
-    '<rect x="36" y="80" width="28" height="12" rx="3" fill="#8a8a8a" stroke="#1a1a1a" stroke-width="3"/>'}`;
+  <g transform="translate(50 18) scale(0.72) translate(-50 -20)">
+    <path d="M30 20 V55 a20 20 0 0 0 40 0 V20" fill="none" stroke="#d9363e" stroke-width="16" stroke-linecap="butt"/>
+    <path d="M30 20 V38 M70 20 V38" stroke="#e8e8e8" stroke-width="16"/>
+    <path d="M30 20 V55 a20 20 0 0 0 40 0 V20" fill="none" stroke="#1a1a1a" stroke-width="4"/>
+  </g>
+  ${on ? '<path d="M50 60 V66 M31 69 L35 73 M69 69 L65 73 M26 80 H32 M74 80 H68" stroke="#ffb800" stroke-width="4" stroke-linecap="round"/>' : ''}
+  <circle cx="50" cy="80" r="10" fill="${on ? '#fff6b0' : '#c9ced3'}" stroke="#1a1a1a" stroke-width="3"/>
+  <rect x="45" y="90" width="10" height="7" rx="2" fill="#9aa5b1" stroke="#1a1a1a" stroke-width="2"/>`;
 
 const eye = (color = '#8a8a8a', object = false) => `
   <ellipse cx="50" cy="50" rx="44" ry="28" fill="#fff" stroke="#1a1a1a" stroke-width="4"/>
@@ -58,27 +89,34 @@ const eye = (color = '#8a8a8a', object = false) => `
   <circle cx="57" cy="43" r="4" fill="#fff"/>
   ${object ? '<rect x="70" y="66" width="24" height="24" rx="4" fill="#c58b4e" stroke="#1a1a1a" stroke-width="3"/>' : ''}`;
 
-const hourglass = (dots = 1) => `
+const hourglass = () => `
   <path d="M28 12 H72 V28 L54 50 L72 72 V88 H28 V72 L46 50 L28 28 Z" fill="#fff" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round"/>
   <path d="M36 20 H64 L50 40 Z" fill="#ffb800"/>
-  <path d="M38 82 H62 L50 64 Z" fill="#ffb800"/>
-  ${dotRow(dots, 93)}`;
+  <path d="M38 82 H62 L50 64 Z" fill="#ffb800"/>`;
 
-function dotRow(n, y = 92) {
-  if (!n || n === Infinity) return '';
-  if (n > 5) return dotRow(5, y - 12) + dotRow(n - 5, y);
-  const gap = 15; const start = 50 - ((n - 1) * gap) / 2;
-  let s = '';
-  for (let i = 0; i < n; i++) s += `<circle cx="${start + i * gap}" cy="${y}" r="5.5" fill="#1a1a1a"/>`;
-  return s;
+// Dot row for counts (steps, seconds, repeats). Pieces draw it in their own strip above the picture
+// (see pieceInner in editor.js) so the picture itself never has to make room for it.
+// A 100 x 16 box: up to 10 dots in one row, Infinity = a wave.
+const DOTS_H = 16;
+function dotsStrip(n) {
+  if (!n) return '';
+  let body;
+  if (n === Infinity) body = '<path d="M22 8 c0-7 8-7 14 0 s14 7 14 0 s8-7 14 0 s14 7 14 0" fill="none" stroke="#1a1a1a" stroke-width="4" stroke-linecap="round"/>';
+  else {
+    const gap = n > 5 ? 9.6 : 15, r = n > 5 ? 4.2 : 5.5;
+    const start = 50 - ((n - 1) * gap) / 2;
+    body = '';
+    for (let i = 0; i < n; i++) body += `<circle cx="${start + i * gap}" cy="${DOTS_H / 2}" r="${r}" fill="#1a1a1a"/>`;
+  }
+  return `<svg viewBox="0 0 100 ${DOTS_H}" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
 }
 
-const loop = (count = 2) => `
-  <g transform="translate(50 46) scale(0.8) translate(-50 -54)">${arcArrow(300, true, '#fff')}</g>
-  ${count === Infinity ? '<path d="M30 92 c0-10 12-10 20 0 s20 10 20 0 s-12-10-20 0 s-20 10-20 0" fill="none" stroke="#1a1a1a" stroke-width="5"/>' : dotRow(count, 92)}`;
+const loop = () => `<g transform="translate(0 -4)">${arcArrow(300, true, '#fff')}</g>`;
 
-const hand = () => `
-  <path d="M38 90 V48 a6 6 0 0 1 12 0 V30 a6 6 0 0 1 12 0 V40 a6 6 0 0 1 12 0 V46 a6 6 0 0 1 12 0 V70 c0 14-10 22-24 22 H54 c-10 0-16-6-22-16 L22 62 a6 6 0 0 1 10-7 L38 62" fill="#ffd9a8" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round"/>`;
+// a bold arrow pressing down on the bumper (drawn in the top third of the box)
+const pressArrow = () => `
+  <path d="M50 4 V22" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/>
+  <path d="M36 16 L50 30 L64 16 Z" fill="#fff" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round"/>`;
 
 const play = () => svg('<circle cx="50" cy="50" r="46" fill="#2ecc40" stroke="#14532d" stroke-width="4"/><path d="M40 28 L74 50 L40 72 Z" fill="#fff"/>');
 const stop = () => svg('<circle cx="50" cy="50" r="46" fill="#ff4136" stroke="#7f1d1d" stroke-width="4"/><rect x="32" y="32" width="36" height="36" rx="4" fill="#fff"/>');
@@ -114,12 +152,12 @@ const wifi = (ok) => svg(`<path d="M20 44 a42 42 0 0 1 60 0 M30 56 a28 28 0 0 1 
 
 export const Icons = {
   // motion
-  forward: (n = 1) => svg(`<g transform="translate(0 -3) scale(1 0.92)">${arrowUp('#fff')}</g>` + dotRow(n, 93)),
-  backward: (n = 1) => svg(`<g transform="translate(0 -3) scale(1 0.92)">${arrowDown('#fff')}</g>` + dotRow(n, 93)),
-  turnRight90: () => svg(arcArrow(90, true)),
-  turnLeft90: () => svg(arcArrow(90, false)),
-  turnRight: (deg = 90) => svg(arcArrow(Math.min(359, deg), true)),
-  turnLeft: (deg = 90) => svg(arcArrow(Math.min(359, deg), false)),
+  forward: () => svg(arrowUp('#fff')),
+  backward: () => svg(arrowDown('#fff')),
+  turnRight90: () => svg(turnArrow(90, true)),
+  turnLeft90: () => svg(turnArrow(90, false)),
+  turnRight: (deg = 90) => svg(turnArrow(Math.min(359, deg), true)),
+  turnLeft: (deg = 90) => svg(turnArrow(Math.min(359, deg), false)),
   plus: () => svg('<circle cx="50" cy="50" r="44" fill="#2ecc40" stroke="#1a1a1a" stroke-width="4"/><path d="M50 26 V74 M26 50 H74" stroke="#fff" stroke-width="12" stroke-linecap="round"/>'),
   minus: () => svg('<circle cx="50" cy="50" r="44" fill="#ff9f43" stroke="#1a1a1a" stroke-width="4"/><path d="M26 50 H74" stroke="#fff" stroke-width="12" stroke-linecap="round"/>'),
   sizeSmall: () => svg('<rect x="34" y="34" width="32" height="32" rx="6" fill="#4da3ff" stroke="#1a1a1a" stroke-width="4"/>'),
@@ -138,8 +176,8 @@ export const Icons = {
   close: () => svg('<circle cx="50" cy="50" r="44" fill="#ff4136" stroke="#1a1a1a" stroke-width="4"/><path d="M32 32 L68 68 M68 32 L32 68" stroke="#fff" stroke-width="10" stroke-linecap="round"/>'),
   turtle: () => svg('<ellipse cx="50" cy="56" rx="30" ry="20" fill="#2ecc40" stroke="#1a1a1a" stroke-width="4"/><path d="M30 56 h40 M40 40 v32 M60 40 v32" stroke="#1c8d2b" stroke-width="3"/><circle cx="84" cy="56" r="10" fill="#6fd97a" stroke="#1a1a1a" stroke-width="4"/><circle cx="87" cy="53" r="2" fill="#1a1a1a"/><path d="M28 72 l-6 12 M40 76 l-2 12 M60 76 l2 12 M72 72 l6 12" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>'),
   rabbit: () => svg('<ellipse cx="46" cy="64" rx="26" ry="18" fill="#f1e4d0" stroke="#1a1a1a" stroke-width="4"/><circle cx="72" cy="52" r="14" fill="#f1e4d0" stroke="#1a1a1a" stroke-width="4"/><path d="M66 40 l-4 -26 M78 40 l6 -26" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round"/><path d="M66 40 l-4 -26 M78 40 l6 -26" stroke="#f1e4d0" stroke-width="4" stroke-linecap="round"/><circle cx="76" cy="50" r="2.5" fill="#1a1a1a"/><circle cx="20" cy="62" r="6" fill="#fff" stroke="#1a1a1a" stroke-width="3"/><path d="M6 46 h10 M4 56 h8" stroke="#9aa5b1" stroke-width="4" stroke-linecap="round"/>'),
-  turn180: () => svg(arcArrow(180, true)),
-  turn360: () => svg(arcArrow(360, true)),
+  turn180: () => svg(turnArrow(180, true)),
+  turn360: () => svg(turnArrow(360, true)),
   // light / magnet
   ledRed: () => svg(bumper('red')),
   ledGreen: () => svg(bumper('green')),
@@ -147,12 +185,13 @@ export const Icons = {
   magnetOn: () => svg(magnet(true)),
   magnetOff: () => svg(magnet(false)),
   // waiting / sensing
-  wait: (n = 1) => svg(hourglass(n)),
-  waitBump: () => svg(bumper('off', true) + `<g transform="translate(30 -8) scale(0.6)">${hand()}</g>`),
+  wait: () => svg(hourglass()),
+  waitBump: () => svg(bumper('off', true) + pressArrow()),
   waitSee: (color = 'red') => svg(eye({ red: '#ff4136', green: '#2ecc40', blue: '#4da3ff' }[color] || '#8a8a8a')),
   waitObject: () => svg(eye('#8a8a8a', true)),
   // control
-  repeat: (n = 2) => svg(loop(n)),
+  repeat: () => svg(loop()),
+  dots: (n) => dotsStrip(n),
   // chrome
   play, stop, trash, flag, bluetooth, robotFace, toy, gamepad, ltr, ttb, battery, compass, speed, crash, star, heart, rocket, gear, steer, puzzle, lightOn, wifi,
   bumperLive: (led, pressed) => svg(bumper(led, pressed)),

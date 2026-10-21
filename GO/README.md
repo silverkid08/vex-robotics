@@ -13,7 +13,7 @@ Along the way we reverse-engineered how VEXcode GO actually talks to the brain a
 **Build tab**
 - Palette of picture pieces: forward/backward (1–5 steps of 15 cm), turns (45/90/135/180°, turn around, spin), bumper light red/green/off, magnet grab/let go, wait (1–5 s), wait for a bump, wait to see red/green/blue, wait to see something, repeat (1–10 or forever).
 - Pieces interlock with knobs and holes, left-to-right or top-to-bottom (one tap to flip), with a dotted snake arrow showing where a row wraps.
-- Tap a piece to change its dots or arc; hold it for − / + buttons. Drag onto empty space or the trash to throw it away.
+- Tap a piece to change its dots or arc; hold it for − / + buttons. Drag onto empty space or the trash to throw it away; tap the trash three times to clear the whole program.
 - The repeat is one big green piece that holds other pieces; repeats cannot be nested.
 - Zoom buttons, three sticker slots to save programs (tap = load, hold = save), autosave.
 - Play runs the program with the active piece wiggling; Stop always stops the robot.

@@ -5,7 +5,7 @@
 import { VexGoBle } from './ble.js';
 import { SimBrain } from './sim.js';
 import { GoRobot } from './robot.js';
-import { Editor } from './editor.js';
+import { Editor, pieceDots } from './editor.js';
 import { Runner } from './runner.js';
 import { DriveTab } from './drive.js';
 import { GamepadInput } from './gamepad.js';
@@ -124,7 +124,7 @@ function buildGuide() {
   const host = $('#guide-pieces');
   host.innerHTML = Pieces.map((def) => {
     const g = Groups[def.group];
-    return `<div class="guide-piece"><div class="gp-icon" style="background:${g.color}">${def.icon(def.defaultParam)}</div><div><b>${labelFor({ id: def.id, param: def.defaultParam })}</b><span>${def.help || ''}</span></div></div>`;
+    return `<div class="guide-piece"><div class="gp-icon" style="background:${g.color}"><div class="gp-dots">${pieceDots(def, def.defaultParam)}</div>${def.icon(def.defaultParam)}</div><div><b>${labelFor({ id: def.id, param: def.defaultParam })}</b><span>${def.help || ''}</span></div></div>`;
   }).join('');
 }
 

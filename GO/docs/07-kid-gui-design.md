@@ -9,10 +9,10 @@ Goal: a four-year-old who cannot read builds and runs robot programs alone, and 
 2b. **Rows wrap and the path is shown.** In left-to-right order pieces wrap to new rows inside the editor (vertical scroll only). A grey dotted snaking arrow leads from the end of one row down and back to the start of the next so a child can follow the order.
 3. **One idea per piece, one colour per family.** Blue = move, purple = turn, yellow = light, pink = magnet, orange = wait/sense, green = repeat. A family's colour never changes.
 4. **Reading direction is a choice.** A toggle flips the strip between left-to-right (tab on the right) and top-to-bottom (tab on the bottom) — the shapes re-render so pieces still interlock.
-5. **Parameters are pictures too.** Tapping a piece cycles its picture-parameter: dots (1–5 steps or seconds), the size of a turn arc (90°, 45°, 135°, 180°), the colour the eye waits for, the repeat count (2, 3, 5, 10 dots, or a wave for forever). Holding a piece for half a second opens a − / + stepper (or a picture picker for colours) for children who find cycling confusing.
+5. **Parameters are pictures too.** Tapping a piece cycles its picture-parameter: dots (1–5 steps or seconds), the size of a turn arc (90°, 45°, 135°, 180°), the colour the eye waits for, the repeat count (2, 3, 5, 10 dots, or a wave for forever). Dots are not part of the picture: every piece has three fixed rows (dots 16 px, picture 64 px, helper words) so the picture is always the same size, stays centred and never reaches the connectors, whether or not helper words are on. Holding a piece for half a second opens a − / + stepper (or a picture picker for colours) for children who find cycling confusing.
 6. **Touch first.** Pointer events, big targets (≥ 74 px, pieces 104 px), no hover-only affordances, no scroll fights (`touch-action: none` on the strip and palette), drags start after 8 px so taps still work.
 7. **Immediate feedback.** Tap = blip, piece runs = wiggle + glow + tick, finish = three-note chime, "no" = low buzz, drop on trash = trash grows and reddens.
-8. **Forgiving and predictable.** A piece must be dropped next to the program (within about 50 px of a piece or the start flag) to join it; dropping it on empty editor space throws it away (same buzz as the trash) so a child can "shake off" a piece anywhere. Tapping a palette piece appends it; everything autosaves; Stop always works.
+8. **Forgiving and predictable.** A piece must be dropped next to the program (within about 50 px of a piece or the start flag) to join it; dropping it on empty editor space throws it away (same buzz as the trash) so a child can "shake off" a piece anywhere. When the program is empty, anywhere in the editor window counts as next to the start flag, so the first piece can be dropped wherever the child lets go. Tapping a palette piece appends it; everything autosaves; Stop always works.
 9. **Safe defaults.** 50 % speed, 150 mm steps, 90° turns, 1.1 s magnet pulses, 20 s per-move timeout.
 
 10. **The palette adapts to the child.** Four small tools above it (and the same options in the gear panel): piece size (small / medium / large), layout (one column, two columns, or a tray across the top), sort order (by colour family, A–Z, most-used first), and helper words on/off. Choices are remembered.
@@ -42,19 +42,19 @@ Drive tab: a row of live sensor pictures (battery, bumper, eye, magnet, compass,
 
 | Piece | Picture | Parameter (tap) | Robot action |
 |---|---|---|---|
-| forward | white up-arrow on blue + dots | 1–5 steps (150 mm each) | `DRIVE_FOR` |
+| forward | white up-arrow on blue, dots above | 1–5 steps (150 mm each) | `DRIVE_FOR` |
 | backward | down-arrow | 1–5 | `DRIVE_FOR −` |
-| turn right | arched arrow clockwise; the arc length shows the angle | 90°·45°·135°·180° | `TURN_FOR +deg` |
-| turn left | arched arrow counter-clockwise | 90°·45°·135°·180° | `TURN_FOR −deg` |
-| turn 180 | half-circle arrow | – | `TURN_FOR 180` |
-| turn 360 | full-circle arrow | – | `TURN_FOR 360` |
+| turn right | arrow with a short stub at the bottom that bends clockwise; the head points where the robot faces afterwards and the arc length shows the angle | 90°·45°·135°·180° | `TURN_FOR +deg` |
+| turn left | same arrow bending counter-clockwise | 90°·45°·135°·180° | `TURN_FOR −deg` |
+| turn 180 | U-turn arrow: over and back down | – | `TURN_FOR 180` |
+| turn 360 | full circle arrow starting on the left, the head coming back round to the start | – | `TURN_FOR 360` |
 | light red / green / off | bumper glowing red / green / grey | – | `SET_SWITCH_LED` |
-| magnet grab / let go | magnet with sparks / magnet dropping block | – | `MAG_BOOST` / `MAG_DROP` |
-| wait | hourglass + dots | 1–5 s | (timer) |
-| wait for bump | hand pressing bumper | – | waits for bumper state |
+| magnet grab / let go | magnet with a lit bulb below it / magnet with a grey bulb | – | `MAG_BOOST` / `MAG_DROP` |
+| wait | hourglass, dots above | 1–5 s | (timer) |
+| wait for bump | arrow pressing down on a squashed bumper | – | waits for bumper state |
 | wait to see colour | eye with red/green/blue iris | red·green·blue | waits for eye colour + object |
 | wait to see something | eye with a box | – | waits for proximity ≥ 50 |
-| repeat | big green frame with loop arrow + dots | 1…10 (two rows of dots) · ∞ (wave) | runs the pieces inside N times; cannot hold another repeat |
+| repeat | big green frame with loop arrow, dots above | 1…10 (one row of smaller dots past 5) · ∞ (wave) | runs the pieces inside N times; cannot hold another repeat |
 
 ## Interaction details
 
@@ -62,6 +62,7 @@ Drive tab: a row of live sensor pictures (battery, bumper, eye, magnet, compass,
 * **Drag inside the strip** → reorder, or move into/out of a repeat (never a repeat into a repeat). Release on empty space = thrown away.
 * **Alignment** → all pieces in a row (or column) are centred on one midline, so a tall repeat piece has its hole and knob at its centre and neighbours still line up.
 * **Drag to trash** → delete (trash grows while a drag is active so the target is obvious).
+* **Triple-tap the trash** (three taps within 1.2 s) → the can tips over and the whole program is cleared. One or two taps only shake the can, so an accidental touch does nothing.
 * **Tap piece** → next parameter picture. **Hold piece** → − / + stepper or picker. **Tap palette piece** → append copy.
 * **Palette tools** (top of palette): size, layout, sort, helper words. **Book button** (top bar) → parent guide overlay with every piece explained.
 * **Direction toggle** → re-renders shapes; order of pieces is unchanged. **Magnifier buttons** → zoom the strip (remembered).

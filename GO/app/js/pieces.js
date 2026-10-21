@@ -3,7 +3,8 @@
 // A piece is a picture the child can drag into the program. Each definition has:
 //   id        - stable name saved in programs (never rename)
 //   group     - palette colour family
-//   icon(p)   - SVG for the current parameter value
+//   icon(p)   - SVG for the current parameter value (the picture only; counts are not drawn in it)
+//   dots(p)   - optional: a count shown as a row of dots above the picture (Infinity = a wave)
 //   params    - optional list of values the child cycles through by tapping
 //               (numeric lists also get a - / + stepper on long-press)
 //   label(p)  - short helper text for grown-ups (hidden unless labels are on)
@@ -52,14 +53,14 @@ const TURN_CHOICES = [90, 45, 135, 180];
 export const Pieces = [
   {
     id: 'forward', group: 'move', params: STEP_CHOICES, defaultParam: 1,
-    icon: (p) => Icons.forward(p),
+    icon: () => Icons.forward(), dots: (p) => p || 1,
     label: (p) => `Forward ${steps(p || 1)}`,
     help: 'Drives forward. Each dot is one step of 15 cm. Tap to add dots, hold for − / +.',
     run: ({ robot, piece }) => robot.driveFor(STEP_MM * (piece.param || 1)),
   },
   {
     id: 'backward', group: 'move', params: STEP_CHOICES, defaultParam: 1,
-    icon: (p) => Icons.backward(p),
+    icon: () => Icons.backward(), dots: (p) => p || 1,
     label: (p) => `Backward ${steps(p || 1)}`,
     help: 'Drives backward. Each dot is one step of 15 cm.',
     run: ({ robot, piece }) => robot.driveFor(-STEP_MM * (piece.param || 1)),
@@ -87,7 +88,7 @@ export const Pieces = [
   { id: 'magnetOff', group: 'magnet', icon: () => Icons.magnetOff(), label: () => 'Magnet let go', help: 'Turns the electromagnet off to drop the disk.', run: ({ robot }) => robot.magnetDrop() },
   {
     id: 'wait', group: 'wait', params: [1, 2, 3, 4, 5], defaultParam: 1,
-    icon: (p) => Icons.wait(p),
+    icon: () => Icons.wait(), dots: (p) => p || 1,
     label: (p) => `Wait ${p || 1} second${(p || 1) === 1 ? '' : 's'}`,
     help: 'Pauses. Each dot is one second.',
     run: ({ piece, signal }) => sleep(1000 * (piece.param || 1), signal),
@@ -116,7 +117,7 @@ export const Pieces = [
   },
   {
     id: 'repeat', group: 'loop', container: true, params: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, Infinity], defaultParam: 2,
-    icon: (p) => Icons.repeat(p),
+    icon: () => Icons.repeat(), dots: (p) => p || 2,
     label: (p) => (p === Infinity ? 'Repeat forever' : `Repeat ${p || 2} time${(p || 2) === 1 ? '' : 's'}`),
     help: 'A big piece that holds other pieces: everything inside runs again and again. Dots = how many times (1 to 10); the wavy line means forever (press stop to end). A repeat cannot go inside another repeat.',
   },

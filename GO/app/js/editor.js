@@ -74,14 +74,23 @@ export function pieceSvg(def, piece, order, first, last, { dark = false, labels 
   </svg>`;
 }
 
+/** Dot row for a piece's count parameter ('' when the piece has none). */
+export function pieceDots(def, param) { return def.dots ? Icons.dots(def.dots(param)) : ''; }
+
+/**
+ * The inside of a piece is three fixed rows: dots, picture, helper words. The rows keep their size
+ * whether or not the words are shown, so the picture never grows into the connectors.
+ */
 function pieceInner(def, piece, labels) {
-  const text = labels ? `<div class="piece-label">${labelFor(piece || { id: def.id, param: def.defaultParam })}</div>` : '';
-  return `<div xmlns="http://www.w3.org/1999/xhtml" class="piece-inner ${labels ? 'with-label' : ''}"><div class="piece-icon">${def.icon(piece?.param ?? def.defaultParam)}</div>${text}</div>`;
+  const param = piece?.param ?? def.defaultParam;
+  const text = labels ? `<div class="piece-label">${labelFor(piece || { id: def.id, param })}</div>` : '';
+  return `<div xmlns="http://www.w3.org/1999/xhtml" class="piece-inner"><div class="piece-dots">${pieceDots(def, param)}</div><div class="piece-icon">${def.icon(param)}</div><div class="piece-words">${text}</div></div>`;
 }
 
 const SETTINGS_KEY = 'vexgo.palette';
 const USAGE_KEY = 'vexgo.usage';
 const ZOOM_KEY = 'vexgo.zoom';
+const TRASH_TAP_WINDOW_MS = 1200; // three taps on the trash within this window clear the program
 
 export class Editor extends EventTarget {
   constructor({ paletteEl, stripEl, stripWrapEl, trashEl, program, popoverEl }) {
@@ -107,6 +116,7 @@ export class Editor extends EventTarget {
     this.applyZoom();
     this.render();
     this._bindPointer();
+    this._bindTrashTaps();
     this._ro = new ResizeObserver(() => this._afterLayout());
     this._ro.observe(this.stripEl);
     this._ro.observe(this.stripWrapEl);
@@ -355,7 +365,7 @@ export class Editor extends EventTarget {
     const paint = () => {
       if (numeric) {
         pop.innerHTML = `<button class="pop-btn" data-step="-1">${Icons.minus()}</button>
-          <div class="pop-preview">${def.icon(piece.param)}${this.labels ? `<div class="pop-label">${labelFor(piece)}</div>` : ''}</div>
+          <div class="pop-preview"><div class="pop-dots">${pieceDots(def, piece.param)}</div><div class="pop-icon">${def.icon(piece.param)}</div>${this.labels ? `<div class="pop-label">${labelFor(piece)}</div>` : ''}</div>
           <button class="pop-btn" data-step="1">${Icons.plus()}</button>`;
       } else {
         pop.innerHTML = def.params.map((v) => `<button class="pop-choice ${v === piece.param ? 'on' : ''}" data-value="${v}">${def.icon(v)}</button>`).join('');
@@ -486,6 +496,34 @@ export class Editor extends EventTarget {
 
   _emitTap(piece) { this.dispatchEvent(new CustomEvent('tap', { detail: piece })); }
 
+  // ---------- trash: triple tap clears the whole program ----------
+
+  _bindTrashTaps() {
+    if (!this.trashEl) return;
+    this._trashTaps = 0;
+    this._trashTapTimer = null;
+    this.trashEl.addEventListener('pointerdown', (e) => {
+      if (this.locked) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      e.preventDefault();
+      clearTimeout(this._trashTapTimer);
+      this._trashTaps += 1;
+      // taps 1 and 2 only shake the can so the child sees it is listening
+      this.trashEl.classList.remove('shake', 'tip');
+      void this.trashEl.offsetWidth; // restart the animation
+      if (this._trashTaps >= 3) {
+        this._trashTaps = 0;
+        this.trashEl.classList.add('tip');
+        this.dispatchEvent(new CustomEvent('trash'));
+        if (this.program.pieces.length) this.clear();
+        return;
+      }
+      this.trashEl.classList.add('shake');
+      this._trashTapTimer = setTimeout(() => { this._trashTaps = 0; }, TRASH_TAP_WINDOW_MS);
+    });
+    this.trashEl.addEventListener('animationend', () => this.trashEl.classList.remove('shake', 'tip'));
+  }
+
   _overTrash(x, y) {
     if (!this.trashEl) return false;
     const r = this.trashEl.getBoundingClientRect();
@@ -497,7 +535,10 @@ export class Editor extends EventTarget {
     // the drop has to be close to the program (its pieces or the start flag); empty editor space means "throw it away"
     const near = 50 * this.zoom;
     const anchors = [...this.stripEl.querySelectorAll('.piece, .strip-start')].filter((el) => el.dataset.uid !== d.uid && !el.classList.contains('dragging'));
-    const close = anchors.some((el) => { const r = el.getBoundingClientRect(); return x >= r.left - near && x <= r.right + near && y >= r.top - near && y <= r.bottom + near; });
+    const within = (r, pad) => x >= r.left - pad && x <= r.right + pad && y >= r.top - pad && y <= r.bottom + pad;
+    let close = anchors.some((el) => within(el.getBoundingClientRect(), near));
+    // an empty program has nothing to be near: anywhere in the editor window is a good place for the first piece
+    if (!close && !this.program.pieces.length) close = within(this.stripWrapEl.getBoundingClientRect(), 0);
     if (!close) return null;
     const order = this.program.order;
     const els = document.elementsFromPoint(x, y);
