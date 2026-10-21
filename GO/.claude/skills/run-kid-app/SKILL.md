@@ -21,11 +21,13 @@ No install step; no bundler. If port 8080 is busy: `PORT=8090 node tools/serve.m
 2. Build tab: tap a palette piece (appends), tap it in the strip (cycles dots), drag a piece to the trash, press the ⇄ button (TTB/LTR), press ▶ and wait 4 s — the toy robot should move and the active piece wiggle. Check the gear panel log for `TX …` lines.
 3. Drive tab (steering-wheel tab): sensor pictures visible; arrow pad present. Holding arrows needs a real pointer hold; the log shows nothing for the simulator's `A1` packets (they are not logged) — use `sim.world` in DevTools if needed:
    `const m = await import('/js/app.js')` is not exposed; instead test driving through `npm test` (`robot.sendRemoteControl` is covered by runner tests).
-4. `read_console_messages` with pattern `rror` must be empty.
+4. Challenge tab (trophy): the level cards appear, the board fills the pretend-robot window with brick walls; tap a card, tap "forward" in the palette, press ▶: the robot moves one square per step; a win shows the star card and the next arrow. Challenge boards always use the pretend robot at 2×. Seeding a program for a board from DevTools: `localStorage['vexgo.<profile>.program.challenge.c12'] = JSON.stringify({order:'ltr', pieces:[{uid:'a', id:'forward', param:1}]})` then tap the card again.
+5. Profiles: the animal button opens the picker; plus → avatar grid; switching child empties/refills the strip and the card stars.
+6. `read_console_messages` with pattern `rror` must be empty.
 
 ## Debugging
 * Gear panel = grown-up log (every script line sent, connection events, errors).
-* `localStorage['vexgo.program.autosave']` holds the current program JSON.
+* `localStorage['vexgo.<profileId>.program.autosave']` holds the current child's program JSON (`vexgo.profile` is the current id; `…program.challenge.<id>` per board; `…challenge.done` the stars).
 * Node tests print the sim's TX lines when a `log` listener is attached (see runner.test.mjs).
 * Web Bluetooth errors: "User cancelled" (chooser closed), `NetworkError` (brain off/out of range), `NotSupportedError: GATT` (retry; VEX retries after 200–500 ms too).
 

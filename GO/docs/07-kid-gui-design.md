@@ -9,7 +9,7 @@ Goal: a four-year-old who cannot read builds and runs robot programs alone, and 
 2b. **Rows wrap and the path is shown.** In left-to-right order pieces wrap to new rows inside the editor (vertical scroll only). A grey dotted snaking arrow leads from the end of one row down and back to the start of the next so a child can follow the order.
 3. **One idea per piece, one colour per family.** Blue = move, purple = turn, yellow = light, pink = magnet, orange = wait/sense, green = repeat. A family's colour never changes.
 4. **Reading direction is a choice.** A toggle flips the strip between left-to-right (tab on the right) and top-to-bottom (tab on the bottom) — the shapes re-render so pieces still interlock.
-5. **Parameters are pictures too.** Tapping a piece cycles its picture-parameter: dots (1–5 steps or seconds), the size of a turn arc (90°, 45°, 135°, 180°), the colour the eye waits for, the repeat count (2, 3, 5, 10 dots, or a wave for forever). Dots are not part of the picture: every piece has three fixed rows (dots 16 px, picture 64 px, helper words) so the picture is always the same size, stays centred and never reaches the connectors, whether or not helper words are on. Holding a piece for half a second opens a − / + stepper (or a picture picker for colours) for children who find cycling confusing.
+5. **Parameters are pictures too.** Tapping a piece cycles its picture-parameter: dots (1–5 steps or seconds), the size of a turn arc (45°, 90°, 135°, 180°, one dot per 45°), the colour the eye waits for (red, green, blue = 1, 2, 3 dots), the repeat count (2, 3, 5, 10 dots, or a wave for forever). Rule: every piece with a setting shows dots that count its position in the tap order, and the tap order is ascending so each tap adds a dot; pieces with nothing to set show none. Dots are not part of the picture: every piece has three fixed rows (dots 16 px, picture 64 px, helper words) so the picture is always the same size, stays centred and never reaches the connectors, whether or not helper words are on. Holding a piece for half a second opens a − / + stepper (or a picture picker for colours) for children who find cycling confusing.
 6. **Touch first.** Pointer events, big targets (≥ 74 px, pieces 104 px), no hover-only affordances, no scroll fights (`touch-action: none` on the strip and palette), drags start after 8 px so taps still work.
 7. **Immediate feedback.** Tap = blip, piece runs = wiggle + glow + tick, finish = three-note chime, "no" = low buzz, drop on trash = trash grows and reddens.
 8. **Forgiving and predictable.** A piece must be dropped next to the program (within about 50 px of a piece or the start flag) to join it; dropping it on empty editor space throws it away (same buzz as the trash) so a child can "shake off" a piece anywhere. When the program is empty, anywhere in the editor window counts as next to the start flag, so the first piece can be dropped wherever the child lets go. Tapping a palette piece appends it; everything autosaves; Stop always works.
@@ -36,6 +36,8 @@ Goal: a four-year-old who cannot read builds and runs robot programs alone, and 
 └────────┴────────────────────────────────────────────────┘
 ```
 
+Challenge tab (trophy): the Build layout with a row of level cards above the strip and the board in the pretend-robot window; winning shows a star-grade card with a next arrow. Rules and legend in [10](10-challenge-mode.md). Top bar: the animal button is the current child (profiles).
+
 Drive tab: a row of live sensor pictures (battery, bumper, eye, magnet, compass, speed, crash), a 4-arrow pad, LED red/green buttons, magnet grab/drop buttons, gamepad badge.
 
 ## Piece catalogue (v0.1)
@@ -45,15 +47,15 @@ Drive tab: a row of live sensor pictures (battery, bumper, eye, magnet, compass,
 | forward | white up-arrow on blue, dots above | 1–5 steps (150 mm each) | `DRIVE_FOR` |
 | backward | down-arrow | 1–5 | `DRIVE_FOR −` |
 | speed | speedometer: a half circle from 9 o'clock to 3 o'clock with five ticks 45° apart, level 3 straight up, red needle on the tick for the level, dots above | 1…5 = 17 / 33 / 50 / 75 / 100 % of VEXcode's range (each half of the dial evenly divided); 3 = the 50 % default; applies to driving and turning from that piece on (Play resets to 3) | `SET_VELOCITY` + `SET_TURNRATE` |
-| turn right | arrow with a short stub at the bottom that bends clockwise; the head points where the robot faces afterwards and the arc length shows the angle | 90°·45°·135°·180° | `TURN_FOR +deg` |
-| turn left | same arrow bending counter-clockwise | 90°·45°·135°·180° | `TURN_FOR −deg` |
+| turn right | arrow with a short stub at the bottom that bends clockwise; the head points where the robot faces afterwards and the arc length shows the angle; dots above, one per 45° | 45°·90°·135°·180° (default 90°) | `TURN_FOR +deg` |
+| turn left | same arrow bending counter-clockwise, dots above | 45°·90°·135°·180° (default 90°) | `TURN_FOR −deg` |
 | turn 180 | U-turn arrow: over and back down | – | `TURN_FOR 180` |
 | turn 360 | full circle arrow starting on the left, the head coming back round to the start | – | `TURN_FOR 360` |
 | light red / green / off | bumper glowing red / green / grey | – | `SET_SWITCH_LED` |
 | magnet grab / let go | magnet with a lit bulb below it / magnet with a grey bulb | – | `MAG_BOOST` / `MAG_DROP` |
 | wait | hourglass, dots above | 1–5 s | (timer) |
 | wait for bump | arrow pressing down on a squashed bumper | – | waits for bumper state |
-| wait to see colour | eye with red/green/blue iris | red·green·blue | waits for eye colour + object |
+| wait to see colour | eye with red/green/blue iris, dots above (1, 2, 3) | red·green·blue | waits for eye colour + object |
 | wait to see something | eye with a box | – | waits for proximity ≥ 50 |
 | repeat | big green frame with loop arrow, dots above | 1…10 (one row of smaller dots past 5) · ∞ (wave) | runs the pieces inside N times; cannot hold another repeat |
 

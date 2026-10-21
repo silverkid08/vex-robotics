@@ -35,6 +35,14 @@ export class SimBrain extends EventTarget {
     this._updateCounter = 0;
     this._timer = null;
     this._activeCommand = 0xff;
+    this.arena = null; // Challenge mode board (challenge.js); null = open floor
+  }
+
+  /** Put the pretend robot on a challenge board (or back on the open floor with null). */
+  setArena(arena) {
+    this.arena = arena;
+    if (arena) arena.reset(this.world);
+    else { const w = this.world; w.x = 0; w.y = 0; w.heading = 0; w.crash = false; w.eye.proximity = 0; w.eye.hue = 0; w.eye.brightness = 0; }
   }
 
   static get isSupported() { return true; }
@@ -57,7 +65,7 @@ export class SimBrain extends EventTarget {
   }
 
   // ---- user interaction with the pretend world (used by the sim view) ----
-  pressBumper(pressed) { this.world.bumper.pressed = pressed; }
+  pressBumper(pressed) { this.world.bumper.held = pressed; this.world.bumper.pressed = pressed; }
   setEyeColor(hue, brightness = 80) { this.world.eye.hue = hue; this.world.eye.brightness = brightness; }
   setEyeProximity(p) { this.world.eye.proximity = p; }
   bump() { this.world.crash = true; setTimeout(() => { this.world.crash = false; }, 500); }
@@ -74,9 +82,9 @@ export class SimBrain extends EventTarget {
   }
   async sendCommands(scripts) { for (const s of scripts) await this.sendCommand(s); }
   async writeProgram() { await delay(5); }
-  async stopProgram() { this._stopMotion(); }
+  async stopProgram() { this._stopMotion(); this.arena?.stop(); }
   async playProgram() {}
-  async setConfigPreset() {}
+  async setConfigPreset() { this.arena?.start(this.world); } // prepare() runs before every program: the board starts fresh and its clock starts
   async setPortConfig() {}
   async clearPortEvents() {}
   async locate() { this._log('beep beep'); }
@@ -106,7 +114,7 @@ export class SimBrain extends EventTarget {
     switch (op) {
       case 'SET_VELOCITY': w.velocity = n(1); break;
       case 'SET_TURNRATE': w.turnRate = n(1); break;
-      case 'SET_HEADING': case 'RESET_HEADING': w.heading = n(1); break;
+      case 'SET_HEADING': case 'RESET_HEADING': if (!this.arena) w.heading = n(1); break; // on a board the robot keeps facing its start direction (this only zeroes the gyro)
       case 'RESET_POS': break;
       case 'CAL_GYRO': w.heading = 0; break;
       case 'DRIVE': w.target = null; w.driveVel = n(1); w.turnVel = 0; this._activeCommand = ProgramCommands.CMD_FWD; break;
@@ -149,12 +157,12 @@ export class SimBrain extends EventTarget {
         break;
       }
       case 'SET_SWITCH_LED': w.bumper.led = n(2); break;
-      case 'MAG_BOOST': w.magnet.on = true; w.magnet.pwm = 100; setTimeout(() => { w.magnet.pwm = 0; }, n(2)); break;
-      case 'MAG_DROP': w.magnet.on = false; w.magnet.pwm = -100; setTimeout(() => { w.magnet.pwm = 0; }, n(2)); break;
+      case 'MAG_BOOST': w.magnet.on = true; w.magnet.pwm = 100; setTimeout(() => { w.magnet.pwm = 0; }, n(2)); this.arena?.command(op, w); break;
+      case 'MAG_DROP': w.magnet.on = false; w.magnet.pwm = -100; setTimeout(() => { w.magnet.pwm = 0; }, n(2)); this.arena?.command(op, w); break;
       case 'MAG_HOLD': w.magnet.on = n(2) !== 0; w.magnet.pwm = n(2); break;
       case 'SET_SENSOR_LED': w.eye.lightOn = n(1) > 0; break;
       case 'SET_SENSOR_PROX': w.eye.range = n(1); break;
-      case 'END': this._stopMotion(); break;
+      case 'END': this._stopMotion(); this.arena?.stop(); break;
       default: break;
     }
   }
@@ -167,7 +175,7 @@ export class SimBrain extends EventTarget {
       const step = Math.min(Math.abs(mmPerSec) * dt, w.target.remaining);
       w.target.remaining -= step;
       this._move(Math.sign(mmPerSec) * step);
-      if (w.target.remaining <= 0.01) this._stopMotion();
+      if (w.target && w.target.remaining <= 0.01) this._stopMotion(); // (a wall may already have cancelled the move)
     } else if (w.target?.kind === 'turn') {
       const step = Math.min(Math.abs(w.turnVel) * dt, w.target.remaining);
       w.target.remaining -= step;
@@ -183,6 +191,7 @@ export class SimBrain extends EventTarget {
       this._move(mmPerSec * dt);
       w.heading += w.turnVel * dt;
     }
+    this.arena?.tick(w);
     this._updateCounter = (this._updateCounter + 1) & 0xff;
     const heading = ((w.heading % 360) + 360) % 360;
     this.dispatchEvent(new CustomEvent('sensor', {
@@ -204,6 +213,11 @@ export class SimBrain extends EventTarget {
   }
 
   _move(mm) {
+    if (this.arena) {
+      // on a challenge board walls stop the robot and cancel the current move
+      if (this.arena.move(this.world, mm) === 'bump') this._stopMotion();
+      return;
+    }
     const rad = (this.world.heading * Math.PI) / 180;
     this.world.x += Math.sin(rad) * mm;
     this.world.y -= Math.cos(rad) * mm;

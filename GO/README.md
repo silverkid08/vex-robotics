@@ -23,6 +23,13 @@ Along the way we reverse-engineered how VEXcode GO actually talks to the brain a
 - Live sensor pictures: battery fill, bumper squashes and glows, eye takes the colour it sees, compass heading, speed lines, crash flash.
 - Xbox (or any standard) controller via the browser Gamepad API.
 
+**Challenge tab**
+- A game on the pretend robot: 23 boards of increasing difficulty (level cards, no text). One square is one robot step. Collect the star, coins, paint tiles with the bumper light, carry pucks to boxes with the magnet, and get through doors that open after a wait, on a bump, or once every coin is collected (one shuts quickly: use the speed piece). Walls stop the robot with a bump. Many boards can be solved in more than one way.
+- Winning shows one, two or three stars: three means the program used as few pieces as the best known solution. Every board is proven solvable by the test suite.
+
+**Children**
+- The animal button is who is playing: switch child or add one by picking a picture. Each child keeps their own programs, stickers and challenge stars.
+
 **Pretend robot**
 - Without a brain the app runs on a simulator: a top-down robot that follows the predicted route (dashed) and leaves a trail, with turtle/rabbit speed buttons, bigger/smaller window buttons, and buttons to press the pretend bumper or show the pretend eye a colour.
 

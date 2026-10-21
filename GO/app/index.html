@@ -12,7 +12,9 @@
   <header class="topbar">
     <button id="tab-build" class="tab on" aria-label="build" data-label="Build" title="Build a program"></button>
     <button id="tab-drive" class="tab" aria-label="drive" data-label="Drive" title="Drive the robot"></button>
+    <button id="tab-challenge" class="tab" aria-label="challenges" data-label="Challenges" title="Challenges on the pretend robot"></button>
     <div class="spacer"></div>
+    <button id="btn-profile" class="round profile-btn" aria-label="who is playing" data-label="Who" title="Who is playing? Tap to switch child"></button>
     <div id="face" class="face" title="Robot connection"></div>
     <button id="btn-connect" class="round" aria-label="connect robot" data-label="Connect" title="Connect to the robot"></button>
     <button id="btn-guide" class="round small" aria-label="parent guide" data-label="Guide" title="Parent guide"></button>
@@ -31,6 +33,7 @@
     </aside>
     <section class="work">
       <div class="work-main">
+      <div id="challenge-bar" class="challenge-bar hidden" aria-label="challenges"></div>
       <div id="strip-wrap" class="strip-wrap">
         <div id="strip" class="strip" data-order="ltr"></div>
       </div>
@@ -60,12 +63,28 @@
 
   <div id="popover" class="popover hidden"></div>
 
+  <div id="win" class="win hidden">
+    <div class="win-card">
+      <div id="win-stars" class="win-stars"></div>
+      <div id="win-face" class="win-face"></div>
+      <button id="win-next" class="round big" aria-label="next challenge" data-label="Next" title="Next challenge"></button>
+    </div>
+  </div>
+
+  <div id="profiles" class="profiles hidden">
+    <div class="profiles-card">
+      <div id="profile-list" class="profile-list"></div>
+      <div id="avatar-pick" class="avatar-pick hidden"></div>
+    </div>
+  </div>
+
   <aside id="grownup" class="grownup hidden">
     <div class="grownup-row">
       <button id="btn-mode" class="round" title="Pretend robot / real robot"></button>
       <label class="check"><input type="checkbox" id="chk-labels"> Helper words on pieces and buttons</label>
       <button id="btn-clear" class="text-btn">Clear program</button>
       <button id="btn-guide2" class="text-btn">Parent guide</button>
+      <button id="btn-profile-remove" class="text-btn">Remove this child's profile</button>
     </div>
     <div class="grownup-row small-text">
       Palette: <select id="sel-size"><option value="small">small pieces</option><option value="medium">medium pieces</option><option value="large">large pieces</option></select>
@@ -92,6 +111,10 @@
       </ol>
       <h3>Pieces</h3>
       <div id="guide-pieces" class="guide-pieces"></div>
+      <h3>Challenges</h3>
+      <p>The trophy tab is a game on the pretend robot. Each card is a little board: brown bricks are walls, the faint arrow is where the robot starts. Build a program and press play to collect everything on the board: the <b>star</b> (drive onto it), <b>coins</b> (drive over them), <b>coloured tiles</b> (stand on one with the bumper light that colour), <b>pucks</b> (magnet grab when it is in front, carry it, magnet let go in front of the matching box). A <b>striped door</b> with a lamp is shut while the lamp is red: some open after a wait, some when the bumper is pressed (tap the toy bumper, or drive into the door to knock), one opens when every coin is collected and one closes after a few seconds (use the speed piece). Walls stop the robot with a bump and it settles back on its square. Winning shows one, two or three stars: three means the program used as few pieces as the best known solution, two means within two pieces of it. Cards remember the best score. The cards get harder from left to right and many can be solved in more than one way.</p>
+      <h3>Children</h3>
+      <p>The animal button in the top bar is who is playing. Tap it to switch child or add one (pick a picture). Each child has their own programs, stickers and challenge stars. A profile can be removed from the grown-up settings.</p>
       <h3>Drive the robot</h3>
       <p>The steering-wheel tab shows live pictures from the robot (battery, bumper, eye, magnet, compass, speed) and big arrows to drive. Hold an arrow to move; the robot stops when you let go. The two bumper buttons light it red or green, the magnet buttons grab and let go. An Xbox controller works too: left stick drives, right stick turns, A/B lights, X/Y magnet.</p>
       <h3>Connect the robot</h3>

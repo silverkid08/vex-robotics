@@ -15,6 +15,7 @@ Everything in the "how VEXcode GO works" documents was derived from the publicly
 | 07 | [Kid GUI design](07-kid-gui-design.md) | Design rules and piece catalogue of the picture-only puzzle app, reading-direction toggle, feedback, roadmap. |
 | 08 | [Xbox controller](08-xbox-controller.md) | Gamepad API mapping used by the app. |
 | 09 | [Developer setup](09-dev-setup.md) | Running the app, tests, simulator, browser requirements, project layout, adding pieces. |
+| 10 | [Challenge mode and profiles](10-challenge-mode.md) | The trophy tab: boards, legend, physics, star grade, the solution tests; child profiles and their storage keys. |
 
 Quick start for grown-ups:
 

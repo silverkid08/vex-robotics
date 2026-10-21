@@ -9,8 +9,10 @@
 
 import { Icons } from './icons.js';
 import { PieceById, STEP_MM } from './pieces.js';
+import { drawBoard, drawPuck, CELL } from './challenge.js';
 
 const SPEEDS = [0.5, 1, 2, 4];
+const CHALLENGE_SPEED = 2; // challenge boards always run at this multiplier (timers are real seconds)
 const WIDTHS = [220, 300, 420, 560];
 const SIZE_KEY = 'vexgo.simview.size';
 const SPEED_KEY = 'vexgo.simview.speed';
@@ -110,12 +112,41 @@ export class SimView {
     }
     this.trail = [];
     this.predicted = [];
+    this.arena = null;
     // view: world bounds (mm) to show
     this.bounds = { minX: -300, maxX: 300, minY: -300, maxY: 300 };
     this.setSize(this.sizeIndex, false);
     this.setSpeed(this.speedIndex, false);
     sim.addEventListener('ports', () => this.draw());
     new ResizeObserver(() => this._resize()).observe(this.root);
+  }
+
+  /**
+   * Challenge mode: show a board instead of the open floor. The window is forced open, the speed
+   * buttons and the eye-colour buttons are hidden (timers are real seconds and the board drives
+   * the eye) and the view frames the whole board.
+   */
+  setArena(arena) {
+    this.arena = arena;
+    this.root.classList.toggle('arena', !!arena);
+    if (arena) {
+      this.root.classList.remove('collapsed');
+      this.sim.speed = CHALLENGE_SPEED;
+      arena.addEventListener('reset', () => { this.trail = []; this.draw(); });
+      arena.addEventListener('progress', () => this.draw());
+    } else {
+      this.setSpeed(this.speedIndex, false);
+      this.root.classList.toggle('collapsed', localStorage.getItem('vexgo.simview') === 'closed');
+    }
+    this.trail = []; this.predicted = [];
+    this._frameArena();
+    this._resize();
+  }
+
+  _frameArena() {
+    if (!this.arena) return;
+    const pad = 30;
+    this.bounds = { minX: -pad, maxX: this.arena.widthMm + pad, minY: -pad, maxY: this.arena.heightMm + pad };
   }
 
   setSize(i, persist = true) {
@@ -145,6 +176,7 @@ export class SimView {
 
   /** Reset the trail and frame the view around the predicted path of a program. */
   fitProgram(program) {
+    if (this.arena) { this.trail = []; this.predicted = []; this._frameArena(); this.draw(); return; }
     const { pts, bounds } = predictPath(program);
     this.predicted = pts;
     this.trail = [];
@@ -172,20 +204,24 @@ export class SimView {
     const { ctx, canvas } = this;
     if (this.root.classList.contains('collapsed')) return;
     const w = this.sim.world;
-    this._include(w.x, w.y);
+    if (this.arena) this._frameArena(); else this._include(w.x, w.y);
     const W = canvas.width, H = canvas.height;
     const b = this.bounds;
-    const spanX = Math.max(600, b.maxX - b.minX), spanY = Math.max(450, b.maxY - b.minY);
+    const spanX = Math.max(this.arena ? 300 : 600, b.maxX - b.minX), spanY = Math.max(this.arena ? 225 : 450, b.maxY - b.minY);
     const scale = Math.min(W / spanX, H / spanY);
     const cx0 = (b.minX + b.maxX) / 2, cy0 = (b.minY + b.maxY) / 2;
     const toPx = (x, y) => [W / 2 + (x - cx0) * scale, H / 2 + (y - cy0) * scale];
     ctx.clearRect(0, 0, W, H);
-    // floor grid: one square = one step (150 mm)
-    ctx.strokeStyle = '#e3e8ee'; ctx.lineWidth = 2;
-    const gx0 = Math.floor((cx0 - W / 2 / scale) / STEP_MM) * STEP_MM, gx1 = cx0 + W / 2 / scale;
-    const gy0 = Math.floor((cy0 - H / 2 / scale) / STEP_MM) * STEP_MM, gy1 = cy0 + H / 2 / scale;
-    for (let x = gx0; x <= gx1; x += STEP_MM) { const [px] = toPx(x, 0); ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H); ctx.stroke(); }
-    for (let y = gy0; y <= gy1; y += STEP_MM) { const [, py] = toPx(0, y); ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(W, py); ctx.stroke(); }
+    if (this.arena) {
+      drawBoard(ctx, this.arena, toPx, scale);
+    } else {
+      // floor grid: one square = one step (150 mm)
+      ctx.strokeStyle = '#e3e8ee'; ctx.lineWidth = 2;
+      const gx0 = Math.floor((cx0 - W / 2 / scale) / STEP_MM) * STEP_MM, gx1 = cx0 + W / 2 / scale;
+      const gy0 = Math.floor((cy0 - H / 2 / scale) / STEP_MM) * STEP_MM, gy1 = cy0 + H / 2 / scale;
+      for (let x = gx0; x <= gx1; x += STEP_MM) { const [px] = toPx(x, 0); ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H); ctx.stroke(); }
+      for (let y = gy0; y <= gy1; y += STEP_MM) { const [, py] = toPx(0, y); ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(W, py); ctx.stroke(); }
+    }
     // predicted route (dashed) then the real trail
     if (this.predicted.length > 1) {
       ctx.setLineDash([10, 10]); ctx.strokeStyle = '#c6d4e3'; ctx.lineWidth = 5; ctx.beginPath();
@@ -219,6 +255,13 @@ export class SimView {
     if (w.bumper.pressed) { ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.beginPath(); ctx.roundRect(-10, -4, 20, 14, 4); ctx.fill(); }
     ctx.fillStyle = w.magnet.on ? '#ff4136' : '#8a8a8a'; ctx.beginPath(); ctx.roundRect(-8, 18, 16, 8, 3); ctx.fill(); ctx.stroke();
     ctx.restore();
+    // a carried puck rides in front of the robot
+    const carried = this.arena?.pucks.find((p) => p.carried);
+    if (carried) {
+      const rad = (w.heading * Math.PI) / 180;
+      const [px, py] = toPx(w.x + Math.sin(rad) * 70, w.y - Math.cos(rad) * 70);
+      drawPuck(ctx, px, py, CELL * scale * 0.22, carried.color, Math.max(1, scale * 6));
+    }
     if (w.crash) { ctx.font = `${32 * s}px sans-serif`; ctx.fillText('💥', rx + 20 * s, ry - 20 * s); }
   }
 }

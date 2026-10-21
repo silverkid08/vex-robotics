@@ -48,7 +48,9 @@ const waitUntil = (robot, pred, signal, timeoutMs = 120000) => new Promise((reso
 
 const steps = (n) => `${n} step${n === 1 ? '' : 's'} (${(n * STEP_MM) / 10} cm)`;
 const STEP_CHOICES = [1, 2, 3, 4, 5];
-const TURN_CHOICES = [90, 45, 135, 180];
+const TURN_CHOICES = [45, 90, 135, 180]; // ascending so tapping adds a dot each time (default 90 = two dots)
+const EYE_COLORS = ['red', 'green', 'blue']; // tap order; the dots count the position (1, 2, 3)
+const turnDots = (deg) => Math.round((deg || 90) / 45); // one dot per 45 degrees: 45 = 1 … 180 = 4
 
 /**
  * Speed levels. VEXcode lets the user pick 1-100 % (it sends half of that to the brain, so the
@@ -84,16 +86,16 @@ export const Pieces = [
   },
   {
     id: 'turnRight90', group: 'turn', params: TURN_CHOICES, defaultParam: 90,
-    icon: (p) => Icons.turnRight(p || 90),
+    icon: (p) => Icons.turnRight(p || 90), dots: turnDots,
     label: (p) => `Turn right ${p || 90}°`,
-    help: 'Turns right. The arc shows how far: tap to choose 90°, 45°, 135° or 180°.',
+    help: 'Turns right. The arc and the dots show how far (each dot is 45°): tap to choose 45°, 90°, 135° or 180°.',
     run: ({ robot, piece }) => robot.turnFor(piece.param || 90),
   },
   {
     id: 'turnLeft90', group: 'turn', params: TURN_CHOICES, defaultParam: 90,
-    icon: (p) => Icons.turnLeft(p || 90),
+    icon: (p) => Icons.turnLeft(p || 90), dots: turnDots,
     label: (p) => `Turn left ${p || 90}°`,
-    help: 'Turns left. Tap to choose 90°, 45°, 135° or 180°.',
+    help: 'Turns left. The arc and the dots show how far (each dot is 45°): tap to choose 45°, 90°, 135° or 180°.',
     run: ({ robot, piece }) => robot.turnFor(-(piece.param || 90)),
   },
   { id: 'turn180', group: 'turn', icon: () => Icons.turn180(), label: () => 'Turn around (180°)', help: 'Turns all the way around to face the other way.', run: ({ robot }) => robot.turnFor(180) },
@@ -120,10 +122,10 @@ export const Pieces = [
     },
   },
   {
-    id: 'waitSee', group: 'wait', params: ['red', 'green', 'blue'], defaultParam: 'red',
-    icon: (p) => Icons.waitSee(p),
+    id: 'waitSee', group: 'wait', params: EYE_COLORS, defaultParam: 'red',
+    icon: (p) => Icons.waitSee(p), dots: (p) => EYE_COLORS.indexOf(p || 'red') + 1,
     label: (p) => `Wait to see ${p || 'red'}`,
-    help: 'Waits until the eye sees something of that colour. Tap to pick red, green or blue.',
+    help: 'Waits until the eye sees something of that colour. Tap to pick red (one dot), green (two) or blue (three).',
     run: ({ robot, piece, signal }) => waitUntil(robot, (s) => s.eye.foundObject && s.eye.color === (piece.param || 'red'), signal),
   },
   {

@@ -25,10 +25,11 @@ No dependencies, no bundler, ES modules. Default mode is the pretend robot (SimB
 - `app/js/editor.js` — palette + strip, jigsaw rendering (`framePath`, `pieceSvg`), repeat frames, wrap arrows, zoom, drag/drop, tap/hold parameters, palette settings.
 - `app/js/runner.js` — executes a program, emits `piece` events for highlighting.
 - `app/js/drive.js`, `gamepad.js` — Drive tab and controller.
-- `app/js/simview.js` — pretend-robot canvas, `predictPath()`, speed and size controls.
+- `app/js/simview.js` — pretend-robot canvas, `predictPath()`, speed and size controls, arena (challenge board) rendering.
+- `app/js/challenges.js` — challenge catalogue (text grids, `par`, hints); `app/js/challenge.js` — `Arena` (board physics, objectives, gates, pucks, drawing). Challenge mode is simulator-only; see docs/10 and the `challenge-design` skill.
 - `app/js/icons.js` — every SVG picture; `app/js/sound.js` — blips.
 - `docs/` — 00–09 numbered documentation (index in docs/README.md). `tests/` — encoder golden vectors, parsers, simulator runs, path prediction.
-- `.claude/skills/` — `vex-go-ble-protocol`, `add-puzzle-piece`, `run-kid-app`, `refresh-vexcode-analysis`, `kid-ui-guidelines`, `new-gui-function` (the owner's settled design decisions, the mock-and-choose workflow and the list of candidate functions). Load the relevant one before touching protocol code, pieces, or anything the child sees.
+- `.claude/skills/` — `vex-go-ble-protocol`, `add-puzzle-piece`, `run-kid-app`, `refresh-vexcode-analysis`, `kid-ui-guidelines`, `new-gui-function` (the owner's settled design decisions, the mock-and-choose workflow and the list of candidate functions), `challenge-design` (boards, legend, physics, par/grade, the mandatory solution test). Load the relevant one before touching protocol code, pieces, challenges, or anything the child sees.
 
 ## Conventions
 
@@ -37,12 +38,13 @@ No dependencies, no bundler, ES modules. Default mode is the pretend robot (SimB
 - Firmware ports are 0-based in code (Code Base: bumper 1, magnet 2, drivetrain = virtual port 4).
 - Colour families are fixed (see `Groups` in pieces.js). Piece ids are stored in saved programs: never rename, only add.
 - `_afterLayout()` in editor.js redraws repeat frames and wrap arrows after any DOM change; call it if you add layout-affecting features.
-- Run `npm test` after changes to encoder/ble/robot/sim/runner/pieces/simview. Verify UI changes in Chrome in both reading directions and at min/max zoom (the `run-kid-app` skill lists the clicks).
-- Keep docs in sync: new piece → docs/03 + docs/07; protocol change → docs/02 + the protocol skill; design rule change → docs/07 + `kid-ui-guidelines`.
+- Run `npm test` after changes to encoder/ble/robot/sim/runner/pieces/simview/challenge(s) (~1 min: the challenge suite runs every board). Every challenge needs a solution in `tests/fixtures/challenge-solutions.mjs` whose first entry has exactly `par` pieces. Verify UI changes in Chrome in both reading directions and at min/max zoom (the `run-kid-app` skill lists the clicks).
+- Keep docs in sync: new piece → docs/03 + docs/07; protocol change → docs/02 + the protocol skill; design rule change → docs/07 + `kid-ui-guidelines`; challenge or board rule → docs/10 + `challenge-design`.
+- Storage is per child: program/progress keys go through `pk()` in app.js (`vexgo.<profileId>.…`); only device/grown-up settings are global.
 - Write code files with the Write/Edit tools; the Bash tool collapses `\\` in heredocs.
 
 ## Current state (2026-10-21)
 
-Done and verified on the simulator: full piece set (incl. a five-level speed piece), interlocking pieces in both directions, repeat frames with inner knob, wrap arrows, zoom, drop-to-delete on empty space (an empty program accepts a drop anywhere), triple-tap trash to clear, hold-for-stepper, helper words, three fixed rows inside every piece (dots / picture / words), parent guide, palette size/layout/sort, docked collapsible pretend-robot window with route prediction, speed and size buttons, Drive tab with picture sensors and gamepad. Not yet tried against a physical GO Brain from this app.
+Done and verified on the simulator: Challenge mode (trophy tab: 23 boards with walls, star, coins, paint tiles, pucks and boxes, four kinds of gate, star grade against par, level cards, every board proven solvable by tests), child profiles (avatar picker, per-child programs/stickers/stars), full piece set (incl. a five-level speed piece), interlocking pieces in both directions, repeat frames with inner knob, wrap arrows, zoom, drop-to-delete on empty space (an empty program accepts a drop anywhere), triple-tap trash to clear, hold-for-stepper, helper words, three fixed rows inside every piece (dots / picture / words), parent guide, palette size/layout/sort, docked collapsible pretend-robot window with route prediction, speed and size buttons, Drive tab with picture sensors and gamepad. Not yet tried against a physical GO Brain from this app.
 
-Open ideas (ranked in the `new-gui-function` skill): drive-until-crash and drive-until-see pieces, eye light, spin/stop, repeat-until, event ("when bumper pressed") start, if/else, Robot Arm preset, record-a-drive, printable cards.
+Open ideas (ranked in the `new-gui-function` skill): more challenges (moving obstacles, blue light piece for `B` tiles), drive-until-crash and drive-until-see pieces, eye light, spin/stop, repeat-until, event ("when bumper pressed") start, if/else, Robot Arm preset, record-a-drive, printable cards.

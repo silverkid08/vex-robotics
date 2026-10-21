@@ -33,11 +33,14 @@ app/
   js/simview.js       canvas view of the pretend robot
   js/icons.js         all SVG pictures
   js/sound.js         WebAudio blips
-  js/app.js           wiring, tabs, stickers, grown-up panel
+  js/app.js           wiring, tabs, stickers, grown-up panel, Challenge tab, profiles
+  js/challenges.js    challenge catalogue (text grids, par, hints)
+  js/challenge.js     Arena: board physics, objectives, drawing
 tests/
   encoder.test.mjs    112 golden vectors from VEX's own encoder
   ble-parse.test.mjs  notification parsers
   runner.test.mjs     end-to-end programs on the simulator
+  challenges.test.mjs every challenge solved by its known solutions (fixtures/challenge-solutions.mjs)
   fixtures/vex-command-golden.json
 tools/serve.mjs       static server
 docs/                 this documentation
@@ -56,6 +59,7 @@ docs/                 this documentation
 
 * Build tab: tap pieces, drag between pieces, into a repeat pocket, to the trash; toggle direction; play on the simulator and watch the toy robot.
 * Drive tab: hold arrows (simulator robot should move); press pretend-bumper/eye buttons on the build tab to see sensor pictures change.
+* Challenge tab: pick a card, build a program, play; a win shows stars and the next arrow; the Build tab still has the free-play program afterwards. See [10](10-challenge-mode.md).
 * Real brain: Bluetooth button → chooser → face turns happy; the grown-up log shows `TX …` lines and acks; a 3-piece program should take ~5 s.
 
 ## Conventions

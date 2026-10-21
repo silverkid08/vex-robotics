@@ -167,6 +167,10 @@ const gear = () => svg('<circle cx="50" cy="50" r="18" fill="none" stroke="#1a1a
 const steer = () => svg('<circle cx="50" cy="50" r="42" fill="none" stroke="#1a1a1a" stroke-width="10"/><circle cx="50" cy="50" r="12" fill="#1a1a1a"/><path d="M50 62 V88 M18 42 L40 48 M82 42 L60 48" stroke="#1a1a1a" stroke-width="8"/>');
 const puzzle = () => svg('<path d="M20 30 h20 a10 10 0 0 1 20 0 h20 v20 a10 10 0 0 0 0 20 v20 h-20 a10 10 0 0 1-20 0 h-20 v-20 a10 10 0 0 1 0-20 z" fill="#4da3ff" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round"/>');
 const lightOn = () => svg('<circle cx="50" cy="42" r="26" fill="#fff6b0" stroke="#1a1a1a" stroke-width="4"/><rect x="40" y="68" width="20" height="18" rx="3" fill="#9aa5b1" stroke="#1a1a1a" stroke-width="3"/><path d="M50 6 V14 M18 20 L24 26 M82 20 L76 26 M8 44 H16 M84 44 H92" stroke="#ffb800" stroke-width="5" stroke-linecap="round"/>');
+const trophy = () => svg('<path d="M30 14 H70 V40 a20 20 0 0 1 -40 0 Z" fill="#ffd166" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round"/><path d="M30 20 H16 a4 4 0 0 0 -4 4 c0 12 8 18 18 18 M70 20 H84 a4 4 0 0 1 4 4 c0 12 -8 18 -18 18" fill="none" stroke="#1a1a1a" stroke-width="4" stroke-linecap="round"/><path d="M50 60 V74" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/><rect x="32" y="74" width="36" height="14" rx="4" fill="#c98f00" stroke="#1a1a1a" stroke-width="4"/><path d="M50 24 L53 31 H61 L55 36 L57 44 L50 39 L43 44 L45 36 L39 31 H47 Z" fill="#fff6b0" stroke="#c98f00" stroke-width="2"/>');
+const cat = () => svg('<path d="M24 40 L18 12 L40 26 Z M76 40 L82 12 L60 26 Z" fill="#ff9f43" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round"/><circle cx="50" cy="54" r="32" fill="#ff9f43" stroke="#1a1a1a" stroke-width="4"/><circle cx="38" cy="50" r="4" fill="#1a1a1a"/><circle cx="62" cy="50" r="4" fill="#1a1a1a"/><path d="M46 62 L50 66 L54 62 Z" fill="#1a1a1a"/><path d="M50 66 V72 M50 72 q-6 6 -12 2 M50 72 q6 6 12 2 M10 56 H34 M10 66 H34 M66 56 H90 M66 66 H90" fill="none" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>');
+const frog = () => svg('<circle cx="32" cy="30" r="12" fill="#2ecc40" stroke="#1a1a1a" stroke-width="4"/><circle cx="68" cy="30" r="12" fill="#2ecc40" stroke="#1a1a1a" stroke-width="4"/><circle cx="32" cy="30" r="5" fill="#1a1a1a"/><circle cx="68" cy="30" r="5" fill="#1a1a1a"/><path d="M14 52 a36 28 0 0 0 72 0 a36 10 0 0 0 -72 0 Z" fill="#2ecc40" stroke="#1a1a1a" stroke-width="4"/><path d="M30 60 q20 16 40 0" fill="none" stroke="#1a1a1a" stroke-width="4" stroke-linecap="round"/><circle cx="40" cy="50" r="3" fill="#1a1a1a"/><circle cx="60" cy="50" r="3" fill="#1a1a1a"/>');
+const plus = () => svg('<circle cx="50" cy="50" r="44" fill="#fff" stroke="#1a1a1a" stroke-width="4" stroke-dasharray="10 8"/><path d="M50 26 V74 M26 50 H74" stroke="#1a1a1a" stroke-width="10" stroke-linecap="round"/>');
 const wifi = (ok) => svg(`<path d="M20 44 a42 42 0 0 1 60 0 M30 56 a28 28 0 0 1 40 0 M40 68 a14 14 0 0 1 20 0" fill="none" stroke="${ok ? '#2ecc40' : '#9aa5b1'}" stroke-width="8" stroke-linecap="round"/><circle cx="50" cy="82" r="7" fill="${ok ? '#2ecc40' : '#9aa5b1'}"/>`);
 
 export const Icons = {
@@ -213,7 +217,8 @@ export const Icons = {
   repeat: () => svg(loop()),
   dots: (n) => dotsStrip(n),
   // chrome
-  play, stop, trash, flag, bluetooth, robotFace, toy, gamepad, ltr, ttb, battery, compass, speed, crash, star, heart, rocket, gear, steer, puzzle, lightOn, wifi,
+  play, stop, trash, flag, bluetooth, robotFace, toy, gamepad, ltr, ttb, battery, compass, speed, crash, star, heart, rocket, gear, steer, puzzle, lightOn, wifi, trophy, cat, frog, plus,
+  starOutline: () => svg('<path d="M50 8 L62 36 L92 38 L68 58 L76 90 L50 72 L24 90 L32 58 L8 38 L38 36 Z" fill="#e9eef3" stroke="#9aa5b1" stroke-width="4" stroke-linejoin="round"/>'),
   bumperLive: (led, pressed) => svg(bumper(led, pressed)),
   eyeLive: (color, object) => svg(eye({ red: '#ff4136', green: '#2ecc40', blue: '#4da3ff' }[color] || '#9aa5b1', object)),
   magnetLive: (on) => svg(magnet(on)),

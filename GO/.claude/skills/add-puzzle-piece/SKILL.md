@@ -23,6 +23,8 @@ Files: `app/js/icons.js`, `app/js/pieces.js`, `app/js/robot.js`, `app/js/sim.js`
 * Always provide `label: (p) => 'Short words'` (shown when helper words are on, used for A–Z sorting) and `help: 'One sentence for the parent guide.'`.
 * Numeric `params` automatically get the hold-to-open − / + stepper; string params get a picture picker.
 * `id` is stored in saved programs — never rename an existing id; add a new one.
+* Any piece with `params` must also define `dots(p)` (position in the tap order, ascending) — see the
+  dot rule in `new-gui-function` §3.
 
 ## 3. Robot capability (`robot.js`) — only if needed
 Add a method that builds a script line (see the `vex-go-ble-protocol` skill), e.g. `motorSpinFor(port, deg)`. Use `this.send(line, Port.Drivetrain)` when the brain should finish before the next piece, `this.send(line)` for fire-and-forget.

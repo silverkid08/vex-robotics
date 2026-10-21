@@ -18,6 +18,7 @@ iterating on the app, so a new function lands looking like it was always there.
 | Container piece (holds other pieces) | `pieces.js` + `editor.js` frame code | `repeat` (the only one; never nested) |
 | Button / gesture on the editor chrome | `index.html` + `app.js` + `editor.js` | trash triple-tap, slot tap/hold, direction toggle |
 | Picture change only | `icons.js` + docs | turn arrows, magnet bulb, bump arrow |
+| Challenge, obstacle or objective type | `challenges.js`, `challenge.js`, solutions fixture | see the `challenge-design` skill |
 
 Ask the owner only when two readings lead to materially different work (e.g. "a speed piece":
 one piece that cycles turtle/rabbit, or three pieces?). Otherwise pick the simplest reading, build it, and say what you assumed.
@@ -57,7 +58,14 @@ Beyond `kid-ui-guidelines`:
   size). Show the *thing that happens* instead: an arrow pressing the bumper, a ball dropping, a wall.
 * **On/off is a small lightbulb**, lit (`#fff6b0` + yellow rays) or grey (`#c9ced3`), below the
   object (see `magnet(on)`). Reuse it for any other on/off device (eye light, future motors).
-* **Counts are dots, never digits**; infinity is a wave. Both live in the dot strip.
+* **Every piece with settings shows dots.** If a piece has `params`, it has `dots(p)` too, so the child can
+  see at a glance that tapping changes something and which setting is current. The dots count the
+  *position* in the tap order, and the tap order is ascending so each tap adds one dot:
+  counts map directly (steps, seconds, repeats, speed level); angles map by step (`turnDots`: one dot
+  per 45°, so 45/90/135/180 = 1/2/3/4); colours map by position (`EYE_COLORS`: red/green/blue = 1/2/3).
+  Infinity is a wave. Dots live in the dot strip, never inside the picture. Pieces with no settings
+  (turn around, spin once, lights, magnet, wait for bump, wait to see something) show no dots.
+  Mention the dot meaning in the piece's `help` ("each dot is 45°", "red (one dot), green (two)…").
 * **Colour families are fixed** (`Groups`). A new family needs a new colour and a docs/07 entry.
 * Standard strokes: 4 px `#1a1a1a` outline, white or saturated fills, `#ffb800` for glow/rays,
   `#4a4a4a` for the bumper base, `#cfcfcf` for an unlit bumper cap.
@@ -88,6 +96,9 @@ When the picture is a matter of taste (most are), do not guess once:
    update docs/07's piece table, reload, zoom on the piece in the palette and the strip.
 
 For a behaviour (gesture, button) build it directly; the owner iterates on the running app.
+
+Anything that stores per-child data (programs, progress, settings a child would change) goes through
+`pk()` in app.js so each profile keeps its own; device and grown-up settings stay global.
 
 ## 6. Candidate functions not yet built (from the VEXcode GO block list, docs/03)
 

@@ -264,14 +264,23 @@ export class Editor extends EventTarget {
       // offsets of the first inner piece relative to the frame (the body is its offsetParent)
       const fx = firstKid ? body.offsetLeft + firstKid.offsetLeft : null;
       const fy = firstKid ? body.offsetTop + firstKid.offsetTop : null;
-      const kx = order === 'ltr' ? (firstKid ? fx : head.offsetLeft + head.offsetWidth) + 19 : (firstKid ? fx + firstKid.offsetWidth / 2 : bodyW / 2);
-      const ky = order === 'ltr' ? (firstKid ? fy + firstKid.offsetHeight / 2 : bodyH / 2) : (firstKid ? fy : head.offsetTop + head.offsetHeight) + 19;
+      // the knob grows out of the head's trailing edge (or the first child's leading edge, which is the same
+      // line) and is shaped exactly like a piece knob, so the first child visibly clicks onto it
+      const x0 = firstKid ? fx : head.offsetLeft + head.offsetWidth;
+      const y0 = firstKid ? fy : head.offsetTop + head.offsetHeight;
+      const ky = firstKid ? fy + firstKid.offsetHeight / 2 : bodyH / 2;
+      const kx = firstKid ? fx + firstKid.offsetWidth / 2 : bodyW / 2;
+      const knob = order === 'ltr'
+        ? `M${x0} ${ky - NECK} ${knobOut('x', 1)}`
+        : `M${kx + NECK} ${y0} ${knobOut('y', 1)}`;
       svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
       svg.setAttribute('width', W); svg.setAttribute('height', H);
       svg.innerHTML = `<path d="${d}" fill="${g.color}" stroke="${g.dark}" stroke-width="4" stroke-linejoin="round"/>
         <path d="${d}" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="2" transform="translate(2 2)"/>
         <rect class="frame-well" x="${order === 'ltr' ? head.offsetLeft + head.offsetWidth - 6 : FRAME_PAD - 6}" y="${order === 'ltr' ? FRAME_PAD - 6 : head.offsetTop + head.offsetHeight - 6}" width="${order === 'ltr' ? bodyW - head.offsetLeft - head.offsetWidth - FRAME_PAD + 6 : SIZE + 12}" height="${order === 'ltr' ? bodyH - 2 * FRAME_PAD + 12 : bodyH - head.offsetTop - head.offsetHeight - FRAME_PAD + 6}" rx="16" fill="rgba(0,0,0,.14)"/>
-        <circle cx="${kx}" cy="${ky}" r="${HEAD_R - 1}" fill="${g.color}" stroke="${g.dark}" stroke-width="4"/>`;
+        <path d="${knob} Z" fill="${g.color}"/>
+        <path d="${knob}" fill="none" stroke="${g.dark}" stroke-width="4" stroke-linejoin="round"/>
+        <path d="${knob}" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="2" transform="translate(2 2)"/>`;
     }
   }
 
