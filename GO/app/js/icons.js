@@ -63,6 +63,25 @@ function turnArrow(sweep, cw = true, color = '#fff') {
     `<path d="${head}" fill="${color}" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round"/>`;
 }
 
+// speed piece: a speedometer. A half circle from 9 o'clock (level 1) to 3 o'clock (level 5) with five tick
+// marks 45 degrees apart, so level 3 (the normal 50 %) points straight up. The needle sits exactly on the
+// tick for the level and never leaves the arc.
+const GAUGE_LEVELS = 5, GAUGE_SWEEP = 180;
+function speedGauge(level = 3) {
+  const cx = 50, cy = 60, r = 36;
+  const lv = Math.min(GAUGE_LEVELS, Math.max(1, Math.round(level)));
+  const angle = (i) => ((-GAUGE_SWEEP / 2 + (i * GAUGE_SWEEP) / (GAUGE_LEVELS - 1)) * Math.PI) / 180; // 0 = straight up
+  const at = (rad, a) => `${cx + rad * Math.sin(a)} ${cy - rad * Math.cos(a)}`;
+  const arc = `M${at(r, angle(0))} A${r} ${r} 0 1 1 ${at(r, angle(GAUGE_LEVELS - 1))}`;
+  let ticks = '';
+  for (let i = 0; i < GAUGE_LEVELS; i++) ticks += `<path d="M${at(r - 7, angle(i))} L${at(r + 1, angle(i))}" stroke="#1a1a1a" stroke-width="4" stroke-linecap="round"/>`;
+  const needle = `<path d="M${at(0, 0)} L${at(r - 9, angle(lv - 1))}" stroke="#1a1a1a" stroke-width="11" stroke-linecap="round"/>` +
+    `<path d="M${at(0, 0)} L${at(r - 9, angle(lv - 1))}" stroke="#ff4136" stroke-width="6" stroke-linecap="round"/>`;
+  return `<path d="${arc}" fill="none" stroke="#1a1a1a" stroke-width="12" stroke-linecap="round"/>` +
+    `<path d="${arc}" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/>` +
+    ticks + needle + `<circle cx="${cx}" cy="${cy}" r="8" fill="#1a1a1a"/>`;
+}
+
 const bumper = (led = 'off', pressed = false) => {
   const glow = led === 'red' ? '#ff3b3b' : led === 'green' ? '#39d353' : '#cfcfcf';
   const halo = led === 'off' ? '' : `<circle cx="50" cy="42" r="40" fill="${glow}" opacity="0.35"/>`;
@@ -176,6 +195,7 @@ export const Icons = {
   close: () => svg('<circle cx="50" cy="50" r="44" fill="#ff4136" stroke="#1a1a1a" stroke-width="4"/><path d="M32 32 L68 68 M68 32 L32 68" stroke="#fff" stroke-width="10" stroke-linecap="round"/>'),
   turtle: () => svg('<ellipse cx="50" cy="56" rx="30" ry="20" fill="#2ecc40" stroke="#1a1a1a" stroke-width="4"/><path d="M30 56 h40 M40 40 v32 M60 40 v32" stroke="#1c8d2b" stroke-width="3"/><circle cx="84" cy="56" r="10" fill="#6fd97a" stroke="#1a1a1a" stroke-width="4"/><circle cx="87" cy="53" r="2" fill="#1a1a1a"/><path d="M28 72 l-6 12 M40 76 l-2 12 M60 76 l2 12 M72 72 l6 12" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round"/>'),
   rabbit: () => svg('<ellipse cx="46" cy="64" rx="26" ry="18" fill="#f1e4d0" stroke="#1a1a1a" stroke-width="4"/><circle cx="72" cy="52" r="14" fill="#f1e4d0" stroke="#1a1a1a" stroke-width="4"/><path d="M66 40 l-4 -26 M78 40 l6 -26" stroke="#1a1a1a" stroke-width="9" stroke-linecap="round"/><path d="M66 40 l-4 -26 M78 40 l6 -26" stroke="#f1e4d0" stroke-width="4" stroke-linecap="round"/><circle cx="76" cy="50" r="2.5" fill="#1a1a1a"/><circle cx="20" cy="62" r="6" fill="#fff" stroke="#1a1a1a" stroke-width="3"/><path d="M6 46 h10 M4 56 h8" stroke="#9aa5b1" stroke-width="4" stroke-linecap="round"/>'),
+  speedLevel: (lv = 3) => svg(speedGauge(lv)),
   turn180: () => svg(turnArrow(180, true)),
   turn360: () => svg(turnArrow(360, true)),
   // light / magnet

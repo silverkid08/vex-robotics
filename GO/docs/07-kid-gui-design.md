@@ -44,6 +44,7 @@ Drive tab: a row of live sensor pictures (battery, bumper, eye, magnet, compass,
 |---|---|---|---|
 | forward | white up-arrow on blue, dots above | 1–5 steps (150 mm each) | `DRIVE_FOR` |
 | backward | down-arrow | 1–5 | `DRIVE_FOR −` |
+| speed | speedometer: a half circle from 9 o'clock to 3 o'clock with five ticks 45° apart, level 3 straight up, red needle on the tick for the level, dots above | 1…5 = 17 / 33 / 50 / 75 / 100 % of VEXcode's range (each half of the dial evenly divided); 3 = the 50 % default; applies to driving and turning from that piece on (Play resets to 3) | `SET_VELOCITY` + `SET_TURNRATE` |
 | turn right | arrow with a short stub at the bottom that bends clockwise; the head points where the robot faces afterwards and the arc length shows the angle | 90°·45°·135°·180° | `TURN_FOR +deg` |
 | turn left | same arrow bending counter-clockwise | 90°·45°·135°·180° | `TURN_FOR −deg` |
 | turn 180 | U-turn arrow: over and back down | – | `TURN_FOR 180` |

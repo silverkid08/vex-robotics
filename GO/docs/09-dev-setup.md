@@ -47,7 +47,7 @@ docs/                 this documentation
 ## Adding a piece (summary; full checklist in `.claude/skills/add-puzzle-piece`)
 
 1. Draw the picture in `icons.js` (100×100 viewBox, thick black outlines, no text).
-2. Add a definition to `Pieces` in `pieces.js`: `id`, `group`, optional `params`, `icon(param)`, `run({robot, piece, signal})`.
+2. Add a definition to `Pieces` in `pieces.js`: `id`, `group`, optional `params`, `icon(param)`, optional `dots(param)` for a count shown above the picture, `run({robot, piece, signal})`. The `new-gui-function` skill holds the settled picture and gesture conventions and a mock-and-choose workflow for pictures.
 3. If it needs a new robot capability, add a method to `GoRobot` (`robot.js`) using a script line from [02](02-bluetooth-protocol.md), and teach `SimBrain` (`sim.js`) how to pretend it.
 4. Add/extend a test in `tests/runner.test.mjs`.
 5. Document it in [03](03-block-reference.md) (puzzle table) and [07](07-kid-gui-design.md).

@@ -133,6 +133,7 @@ The toolbox only shows categories for configured devices. Without a robot: Inert
 | ↻180 / ↻360 | turn right for 180°/360° | `TURN_FOR 180/360 25` |
 | 🔴/🟢/⚪ bumper | set bumper to red/green/off | `SET_SWITCH_LED 1 -100/100/0` |
 | 🧲 on / off | energize magnet boost/drop | `MAG_BOOST 2 1100` / `MAG_DROP 2 1100` |
+| speedometer 1…5 | set drive velocity + set turn velocity to 17/33/50/75/100 % | `SET_VELOCITY 9…50` + `SET_TURNRATE 9…50` |
 | ⏳ ×1…5 | wait 1…5 seconds | – |
 | 👆bumper | wait until bumper pressed | – (status) |
 | 👁🔴/🟢/🔵 | wait until eye detects colour | – (status) |

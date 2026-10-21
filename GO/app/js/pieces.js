@@ -50,6 +50,16 @@ const steps = (n) => `${n} step${n === 1 ? '' : 's'} (${(n * STEP_MM) / 10} cm)`
 const STEP_CHOICES = [1, 2, 3, 4, 5];
 const TURN_CHOICES = [90, 45, 135, 180];
 
+/**
+ * Speed levels. VEXcode lets the user pick 1-100 % (it sends half of that to the brain, so the
+ * firmware range is 1-50); 50 % is the default. Five levels drawn as a half-circle dial with level 3
+ * straight up: the slow half runs 17 → 50 % and the fast half 50 → 100 %, each divided evenly
+ * (a straight line through 50 and 100 would put level 1 at 0 %, which does not move).
+ */
+export const SPEED_LEVELS = [1, 2, 3, 4, 5];
+const SPEED_PERCENT = [17, 33, 50, 75, 100];
+export const speedPercent = (level) => SPEED_PERCENT[Math.min(SPEED_PERCENT.length, Math.max(1, Math.round(level || 3))) - 1];
+
 export const Pieces = [
   {
     id: 'forward', group: 'move', params: STEP_CHOICES, defaultParam: 1,
@@ -64,6 +74,13 @@ export const Pieces = [
     label: (p) => `Backward ${steps(p || 1)}`,
     help: 'Drives backward. Each dot is one step of 15 cm.',
     run: ({ robot, piece }) => robot.driveFor(-STEP_MM * (piece.param || 1)),
+  },
+  {
+    id: 'speed', group: 'move', params: SPEED_LEVELS, defaultParam: 3,
+    icon: (p) => Icons.speedLevel(p || 3), dots: (p) => p || 3,
+    label: (p) => `Speed ${p || 3} of 5 (${speedPercent(p)}%)`,
+    help: 'Sets how fast the robot drives and turns from here on. One dot is slowest, five is fastest; three is normal.',
+    run: ({ robot, piece }) => robot.setSpeed(speedPercent(piece.param)),
   },
   {
     id: 'turnRight90', group: 'turn', params: TURN_CHOICES, defaultParam: 90,

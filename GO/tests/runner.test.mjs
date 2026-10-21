@@ -103,3 +103,26 @@ test('remote-control stick values move the pretend robot (Drive tab path)', asyn
   assert.equal(sim.world.driveVel, 0);
   await sim.disconnect();
 });
+
+test('speed piece sets drive and turn velocity for the pieces after it', async () => {
+  const sim = new SimBrain();
+  sim.tickMs = 20; sim.speed = 8;
+  const robot = new GoRobot(sim);
+  await sim.connect();
+  const runner = new Runner(robot);
+  const tx = [];
+  sim.addEventListener('log', (e) => tx.push(e.detail));
+  const program = { order: 'ltr', pieces: [makePiece('speed', 5), makePiece('forward', 1), makePiece('speed', 1), makePiece('turnRight90', 90)] };
+  const finished = new Promise((r) => runner.addEventListener('finish', (e) => r(e.detail)));
+  runner.run(program);
+  const result = await finished;
+  assert.equal(result.ok, true, result.error);
+  // level 5 = 100 % → firmware 50; level 1 = 17 % → firmware 9 (VEXcode halves what the user asks for, rounded)
+  assert.ok(tx.some((l) => l.includes('SET_VELOCITY 50')), `expected SET_VELOCITY 50 in ${tx.join(' | ')}`);
+  assert.ok(tx.some((l) => l.includes('SET_TURNRATE 50')), 'expected SET_TURNRATE 50');
+  assert.ok(tx.some((l) => /DRIVE_FOR \d+ 50/.test(l)), 'forward should drive at the fast speed');
+  assert.ok(tx.some((l) => l.includes('SET_VELOCITY 9')), 'expected SET_VELOCITY 9');
+  assert.ok(tx.some((l) => /TURN_FOR 90 9/.test(l)), 'turn should use the slow speed');
+  assert.equal(sim.world.velocity, 9, 'the pretend brain keeps the last speed');
+  await sim.disconnect();
+});

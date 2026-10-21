@@ -28,7 +28,7 @@ No dependencies, no bundler, ES modules. Default mode is the pretend robot (SimB
 - `app/js/simview.js` — pretend-robot canvas, `predictPath()`, speed and size controls.
 - `app/js/icons.js` — every SVG picture; `app/js/sound.js` — blips.
 - `docs/` — 00–09 numbered documentation (index in docs/README.md). `tests/` — encoder golden vectors, parsers, simulator runs, path prediction.
-- `.claude/skills/` — `vex-go-ble-protocol`, `add-puzzle-piece`, `run-kid-app`, `refresh-vexcode-analysis`, `kid-ui-guidelines`. Load the relevant one before touching protocol code, pieces, or anything the child sees.
+- `.claude/skills/` — `vex-go-ble-protocol`, `add-puzzle-piece`, `run-kid-app`, `refresh-vexcode-analysis`, `kid-ui-guidelines`, `new-gui-function` (the owner's settled design decisions, the mock-and-choose workflow and the list of candidate functions). Load the relevant one before touching protocol code, pieces, or anything the child sees.
 
 ## Conventions
 
@@ -43,6 +43,6 @@ No dependencies, no bundler, ES modules. Default mode is the pretend robot (SimB
 
 ## Current state (2026-10-21)
 
-Done and verified on the simulator: full piece set, interlocking pieces in both directions, repeat frames with inner knob, wrap arrows, zoom, drop-to-delete on empty space, hold-for-stepper, helper words, parent guide, palette size/layout/sort, docked collapsible pretend-robot window with route prediction, speed and size buttons, Drive tab with picture sensors and gamepad. Not yet tried against a physical GO Brain from this app.
+Done and verified on the simulator: full piece set (incl. a five-level speed piece), interlocking pieces in both directions, repeat frames with inner knob, wrap arrows, zoom, drop-to-delete on empty space (an empty program accepts a drop anywhere), triple-tap trash to clear, hold-for-stepper, helper words, three fixed rows inside every piece (dots / picture / words), parent guide, palette size/layout/sort, docked collapsible pretend-robot window with route prediction, speed and size buttons, Drive tab with picture sensors and gamepad. Not yet tried against a physical GO Brain from this app.
 
-Open ideas: if/else and event ("when bumper pressed") pieces, speed piece, Robot Arm preset, printable cards, record-a-drive.
+Open ideas (ranked in the `new-gui-function` skill): drive-until-crash and drive-until-see pieces, eye light, spin/stop, repeat-until, event ("when bumper pressed") start, if/else, Robot Arm preset, record-a-drive, printable cards.

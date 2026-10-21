@@ -177,6 +177,8 @@ export class GoRobot extends EventTarget {
 
   /** Velocity in percent (VEXcode halves what the user asks for: 50% -> firmware 25). */
   async setDriveVelocity(pct) { this._driveVelocity = clamp(Math.round(pct * 0.5), -100, 100); await this.send(`SET_VELOCITY ${this._driveVelocity}`); }
+  /** One speed for both driving and turning (the speed piece). */
+  async setSpeed(pct) { await this.setDriveVelocity(pct); await this.setTurnVelocity(pct); }
   async setTurnVelocity(pct) { this._turnVelocity = clamp(Math.round(pct * 0.5), -100, 100); await this.send(`SET_TURNRATE ${this._turnVelocity}`); }
 
   /** Drive forever at the current velocity. direction = 1 forward, -1 reverse. */
