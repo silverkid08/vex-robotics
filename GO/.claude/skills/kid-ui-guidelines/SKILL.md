@@ -1,0 +1,19 @@
+---
+name: kid-ui-guidelines
+description: Design rules for the picture-only, pre-reader (age 4) interface of the VEX GO puzzle app — pictures instead of words, jigsaw piece shapes, colour families, touch targets, feedback sounds, reading-direction toggle. Use before changing anything a child sees (index.html, style.css, icons.js, editor.js, drive.js).
+---
+
+# Kid UI guidelines (age 4, cannot read)
+
+Full rationale: `docs/07-kid-gui-design.md`.
+
+1. **Pictures first.** The child-facing UI must work with no text: quantities are dots (●●●), angles are arc lengths, states are glows/poses, directions are arrows. Text exists as (a) `title` tooltips and short `data-label` captions that only render when the grown-up "helper words" toggle is on (`body.labels`), (b) the parent guide overlay (`#guide`, built from each piece's `label`/`help`), (c) the gear panel. Every new piece needs `label(p)` and `help`.
+2. **Jigsaw pieces.** Program pieces are rendered by `pieceSvg()` in `editor.js` with `puzzlePath(order, first, last)` (a special case of `framePath(order, W, H, first, last)`): round hole on the leading edge, mushroom knob (36 px) on the trailing edge, 124 px body (top-to-bottom pieces are `HOLE_DEPTH` taller and their picture starts below the hole so connectors never overlap the icon), 4 px dark outline in the family colour, white inner highlight. Neighbours overlap by the knob size (`--knob` in CSS) so knobs sit in holes. The last piece of a strip or of a repeat has no knob. A repeat is ONE big piece: `.piece-container` holds a `.container-frame` SVG (path drawn after layout by `_drawFrames()` from the measured size, with an inner knob for the first child), the head picture and the `.container-body`. Repeats are never nested (`_dropTarget` refuses). Left-to-right rows wrap; `_drawWrapArrows()` draws the dotted snake arrow in `.wrap-overlay`. The strip is zoomed with CSS `zoom` (`Editor.zoomBy`). Don't introduce rectangles for program steps, and never let overlays (robot window, panels) cover the strip.
+3. **Colour families are fixed** (`Groups` in `pieces.js`): move blue `#4da3ff`, turn purple `#7b61ff`, light yellow `#ffd166`, magnet pink `#ef476f`, wait/sense orange `#ff9f43`, repeat green `#2ecc40`. New family = new colour + docs entry.
+4. **Reading direction toggle** must keep working: anything that lays out pieces checks `program.order` ('ltr' | 'ttb') and the strip's `data-order` CSS.
+5. **Touch targets ≥ 74 px**, pieces 104 px, pad buttons 120 px; `touch-action: none` on draggable areas; drags start after 8 px of movement so taps still cycle parameters; holding 0.5 s opens the − / + stepper popover (`#popover`). Palette size/layout/sort are user settings (`Editor.settings`, persisted) — new palette features must work in list, grid and tray layouts at all three sizes.
+6. **Feedback for every action**: tap blip, running piece wiggles/glows with a tick, success chime, refusal buzz (`sound.js`), trash grows while dragging. Never fail silently.
+7. **Predictable drops**: a drop joins the program only within ~50 px (× zoom) of an existing piece or the start flag (`_dropTarget`); anywhere else the piece is discarded with the trash sound. Rows/columns use `align-items: center` so connectors of tall pieces (repeat) stay on the shared midline. Play without a robot → flash the Bluetooth button and buzz; Stop always available and always works (also from the Drive tab).
+8. **Sensor pictures, not values** (Drive tab): bumper squashes and glows, eye iris takes the colour, battery fill shrinks and changes colour, compass needle turns, crash star flashes. Thresholds come from VEXcode (`hueToColor`, proximity ≥ 50).
+9. **Grown-up things go behind the gear**: connection mode, logs, clear, hints. Keep that panel out of the child's reach visually (small, low-contrast button).
+10. **Verify on a touch screen size** (`@media (max-width: 800px)` rules) and in both reading directions before calling a UI change done.

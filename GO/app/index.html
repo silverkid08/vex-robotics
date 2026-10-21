@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>GO Puzzle Coder</title>
+<meta name="description" content="Picture-only puzzle-piece programming and driving for VEX GO robots.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M20 30h20a10 10 0 0 1 20 0h20v20a10 10 0 0 0 0 20v20h-20a10 10 0 0 1-20 0h-20v-20a10 10 0 0 1 0-20z' fill='%234da3ff' stroke='%23111' stroke-width='4'/%3E%3C/svg%3E">
+</head>
+<body>
+  <header class="topbar">
+    <button id="tab-build" class="tab on" aria-label="build" data-label="Build" title="Build a program"></button>
+    <button id="tab-drive" class="tab" aria-label="drive" data-label="Drive" title="Drive the robot"></button>
+    <div class="spacer"></div>
+    <div id="face" class="face" title="Robot connection"></div>
+    <button id="btn-connect" class="round" aria-label="connect robot" data-label="Connect" title="Connect to the robot"></button>
+    <button id="btn-guide" class="round small" aria-label="parent guide" data-label="Guide" title="Parent guide"></button>
+    <button id="btn-gear" class="round small" aria-label="grown-ups" data-label="Settings" title="Grown-up settings"></button>
+  </header>
+
+  <main id="build" class="screen">
+    <aside class="palette-wrap">
+      <div class="palette-tools">
+        <button id="pal-size" class="tool" title="Piece size"></button>
+        <button id="pal-layout" class="tool" title="Palette layout"></button>
+        <button id="pal-sort" class="tool" title="Sort pieces"></button>
+        <button id="pal-labels" class="tool" title="Show helper words"></button>
+      </div>
+      <div id="palette" class="palette"></div>
+    </aside>
+    <section class="work">
+      <div class="work-main">
+      <div id="strip-wrap" class="strip-wrap">
+        <div id="strip" class="strip" data-order="ltr"></div>
+      </div>
+      <div class="bottombar">
+        <button id="btn-play" class="round big" aria-label="play" data-label="Play" title="Play"></button>
+        <button id="btn-stop" class="round big" aria-label="stop" data-label="Stop" title="Stop"></button>
+        <button id="btn-order" class="round" aria-label="reading direction" data-label="Direction" title="Read left-to-right or top-to-bottom"></button>
+        <button id="btn-zoom-out" class="round small" aria-label="zoom out" data-label="Smaller" title="Make pieces smaller"></button>
+        <button id="btn-zoom-in" class="round small" aria-label="zoom in" data-label="Bigger" title="Make pieces bigger"></button>
+        <div class="spacer"></div>
+        <div class="slots">
+          <button class="round slot" data-slot="star" aria-label="slot 1" data-label="Saved 1" title="Tap to load, hold to save"></button>
+          <button class="round slot" data-slot="heart" aria-label="slot 2" data-label="Saved 2" title="Tap to load, hold to save"></button>
+          <button class="round slot" data-slot="rocket" aria-label="slot 3" data-label="Saved 3" title="Tap to load, hold to save"></button>
+        </div>
+        <div class="spacer"></div>
+        <div id="trash" class="trash" aria-label="trash" data-label="Trash" title="Drag a piece here to remove it"></div>
+      </div>
+      </div>
+      <div id="simview" class="simview"></div>
+    </section>
+  </main>
+
+  <main id="drive-wrap" class="screen hidden">
+    <div id="drive" class="drive"></div>
+  </main>
+
+  <div id="popover" class="popover hidden"></div>
+
+  <aside id="grownup" class="grownup hidden">
+    <div class="grownup-row">
+      <button id="btn-mode" class="round" title="Pretend robot / real robot"></button>
+      <label class="check"><input type="checkbox" id="chk-labels"> Helper words on pieces and buttons</label>
+      <button id="btn-clear" class="text-btn">Clear program</button>
+      <button id="btn-guide2" class="text-btn">Parent guide</button>
+    </div>
+    <div class="grownup-row small-text">
+      Palette: <select id="sel-size"><option value="small">small pieces</option><option value="medium">medium pieces</option><option value="large">large pieces</option></select>
+      <select id="sel-layout"><option value="list">one column</option><option value="grid">two columns</option><option value="tray">tray across the top</option></select>
+      <select id="sel-sort"><option value="family">by colour family</option><option value="az">A to Z</option><option value="recent">most used first</option></select>
+    </div>
+    <div id="log" class="log"></div>
+  </aside>
+
+  <div id="guide" class="guide hidden">
+    <div class="guide-card">
+      <button id="guide-close" class="round small guide-close" aria-label="close"></button>
+      <h2>Parent guide</h2>
+      <p class="lead">Everything your child sees is a picture. This page explains what each picture means so you can show them the first time.</p>
+      <h3>Build a program</h3>
+      <ol>
+        <li><b>Tap</b> a piece in the side palette to add it to the end of the program, or <b>drag</b> it to exactly where you want it. The green flag is where the program starts.</li>
+        <li><b>Tap</b> a piece in the program to change its picture setting: more dots = more steps or seconds, a bigger arc = a bigger turn, a different colour ball for the eye.</li>
+        <li><b>Hold</b> a piece for half a second to get − and + buttons (or a colour picker).</li>
+        <li><b>Drag</b> a piece onto the trash can to remove it. Drag pieces into the green repeat pocket to run them several times.</li>
+        <li>The ⇄ button flips the program between reading <b>left-to-right</b> and <b>top-to-bottom</b>.</li>
+        <li>Press the big green <b>play</b> button. The running piece wiggles. The red <b>stop</b> button always stops the robot.</li>
+        <li>Stickers (star, heart, rocket): <b>tap</b> to load a saved program, <b>hold</b> to save the current one.</li>
+      </ol>
+      <h3>Pieces</h3>
+      <div id="guide-pieces" class="guide-pieces"></div>
+      <h3>Drive the robot</h3>
+      <p>The steering-wheel tab shows live pictures from the robot (battery, bumper, eye, magnet, compass, speed) and big arrows to drive. Hold an arrow to move; the robot stops when you let go. The two bumper buttons light it red or green, the magnet buttons grab and let go. An Xbox controller works too: left stick drives, right stick turns, A/B lights, X/Y magnet.</p>
+      <h3>Connect the robot</h3>
+      <p>Turn on the GO Brain, tap the round Bluetooth button and pick the brain from the list. The robot face smiles when connected. Without a brain the app uses a pretend robot (the little window top-right) so your child can still play. Use the gear button to switch modes, show these helper words on every piece, change the palette size, layout and sort order, and see what the robot was told.</p>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
