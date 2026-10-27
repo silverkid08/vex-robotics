@@ -41,6 +41,10 @@ collected, `{ closeAfter: s }` starts open and shuts; a robot in the doorway is 
 Gate clocks run only while a program runs and count real seconds, like the wait piece, which is why
 the pretend robot's speed is fixed (2×) in Challenge mode.
 
+The parent guide (book button) has a "Challenge pictures" section: every entry of `BoardLegend`
+(challenge.js) drawn by `drawBoard` from a tiny sample grid, with what it is and what to do. Add an
+entry there for any new symbol or state.
+
 ## Physics
 
 * The robot is a 104 mm disc. Driving into a wall or a shut gate stops it: the move is cancelled

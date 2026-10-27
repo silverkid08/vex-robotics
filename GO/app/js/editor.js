@@ -90,6 +90,7 @@ function pieceInner(def, piece, labels) {
 const SETTINGS_KEY = 'vexgo.palette';
 const USAGE_KEY = 'vexgo.usage';
 const ZOOM_KEY = 'vexgo.zoom';
+const END_ZONE = 180; // px (x zoom): how far past the last piece a drop still lands on the end of the program
 const TRASH_TAP_WINDOW_MS = 1200; // three taps on the trash within this window clear the program
 
 export class Editor extends EventTarget {
@@ -543,13 +544,24 @@ export class Editor extends EventTarget {
   _dropTarget(x, y, d) {
     // the drop has to be close to the program (its pieces or the start flag); empty editor space means "throw it away"
     const near = 50 * this.zoom;
+    const order = this.program.order;
     const anchors = [...this.stripEl.querySelectorAll('.piece, .strip-start')].filter((el) => el.dataset.uid !== d.uid && !el.classList.contains('dragging'));
     const within = (r, pad) => x >= r.left - pad && x <= r.right + pad && y >= r.top - pad && y <= r.bottom + pad;
     let close = anchors.some((el) => within(el.getBoundingClientRect(), near));
+    // the end of the program gets a bigger landing zone: a generous stretch past the last piece in the
+    // reading direction, so "put it on the end" does not need a precise drop
+    if (!close) {
+      const tail = [...this.stripEl.querySelectorAll(':scope > .piece, :scope > .piece-container')].filter((el) => el.dataset.uid !== d.uid && !el.classList.contains('dragging')).pop();
+      if (tail) {
+        const r = tail.getBoundingClientRect(), reach = END_ZONE * this.zoom;
+        close = order === 'ltr'
+          ? x >= r.right - near && x <= r.right + reach && y >= r.top - near && y <= r.bottom + near
+          : y >= r.bottom - near && y <= r.bottom + reach && x >= r.left - near && x <= r.right + near;
+      }
+    }
     // an empty program has nothing to be near: anywhere in the editor window is a good place for the first piece
     if (!close && !this.program.pieces.length) close = within(this.stripWrapEl.getBoundingClientRect(), 0);
     if (!close) return null;
-    const order = this.program.order;
     const els = document.elementsFromPoint(x, y);
     const containerBody = els.find((el) => el.classList?.contains('container-body'));
     let list = this.program.pieces;

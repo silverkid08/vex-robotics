@@ -243,6 +243,7 @@ body.labels .pad-btn::after { color: #fff; }
 .guide-piece .gp-dots { width: 100%; height: 10px; flex: none; }
 .guide-piece .gp-dots svg { width: 100%; height: 100%; display: block; }
 .guide-piece .gp-icon > svg { flex: 1; min-height: 0; width: 100%; }
+.guide-piece .gp-board { width: 96px; height: 64px; flex: none; border-radius: 12px; display: block; }
 .guide-piece b { display: block; }
 .guide-piece span { font-size: 13px; color: #444; }
 

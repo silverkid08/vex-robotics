@@ -15,7 +15,7 @@ import { Icons } from './icons.js';
 import { Pieces, Groups, serializeProgram, deserializeProgram, labelFor } from './pieces.js';
 import { Sound } from './sound.js';
 import { Challenges, gradeSolution } from './challenges.js';
-import { Arena, drawBoard, CELL } from './challenge.js';
+import { Arena, drawBoard, CELL, BoardLegend } from './challenge.js';
 
 const $ = (sel) => document.querySelector(sel);
 const LABELS_KEY = 'vexgo.labels';
@@ -265,6 +265,23 @@ function buildGuide() {
   }).join('');
 }
 
+/** Parent guide: every board picture drawn by the real board code, with what it is and what to do. */
+function buildBoardGuide() {
+  const host = $('#guide-board');
+  host.innerHTML = BoardLegend.map((item, i) => `<div class="guide-piece"><canvas class="gp-board" data-i="${i}" width="192" height="128"></canvas><div><b>${item.title}</b><span>${item.text}</span></div></div>`).join('');
+  for (const canvas of host.querySelectorAll('canvas')) {
+    const item = BoardLegend[Number(canvas.dataset.i)];
+    const arena = new Arena({ id: `legend${canvas.dataset.i}`, sample: true, grid: item.grid, dir: item.dir, gate: item.gate });
+    if (item.setup) item.setup(arena);
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height, pad = 8;
+    const scale = Math.min((W - 2 * pad) / arena.widthMm, (H - 2 * pad) / arena.heightMm);
+    const ox = (W - arena.widthMm * scale) / 2, oy = (H - arena.heightMm * scale) / 2;
+    ctx.fillStyle = '#eef2f7'; ctx.fillRect(0, 0, W, H);
+    drawBoard(ctx, arena, (x, y) => [ox + x * scale, oy + y * scale], scale);
+  }
+}
+
 // ---------------- challenge mode ----------------
 
 const doneMap = () => { try { return JSON.parse(localStorage.getItem(pk('challenge.done')) || '{}'); } catch (e) { return {}; } };
@@ -412,6 +429,7 @@ function init() {
   setLabels(localStorage.getItem(LABELS_KEY) === '1');
   paintPaletteTools();
   buildGuide();
+  buildBoardGuide();
 
   setTransport(VexGoBle.isSupported && localStorage.getItem('vexgo.mode') === 'ble' ? 'ble' : 'sim');
 

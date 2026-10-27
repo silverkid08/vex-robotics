@@ -37,6 +37,7 @@ export function parseBoard(def) {
       else if (ch !== '.') throw new Error(`${def.id}: unknown cell '${ch}'`);
     }
   });
+  if (def.sample) return b; // legend samples (parent guide) need no start, objective or gate rule
   if (!b.start) throw new Error(`${def.id}: no start`);
   if (!b.star && !b.coins.length && !b.tiles.length && !b.boxes.length) throw new Error(`${def.id}: nothing to do`);
   if (b.gates.length && !def.gate) throw new Error(`${def.id}: gates need a gate rule`);
@@ -76,6 +77,7 @@ export class Arena extends EventTarget {
 
   place(world) {
     const s = this.board.start;
+    if (!s) return;
     world.x = (s.c + 0.5) * CELL; world.y = (s.r + 0.5) * CELL; world.heading = DIRS[s.dir] ?? 0;
     world.driveVel = 0; world.turnVel = 0; world.target = null;
     world.bumper.led = 0; world.bumper.pressed = !!world.bumper.held; world.magnet.on = false; world.magnet.pwm = 0; world.crash = false;
@@ -252,7 +254,7 @@ export function drawBoard(ctx, arena, toPx, scale, { thumb = false } = {}) {
     }
   }
   // start marker: a faint arrow the way the robot faces
-  {
+  if (b.start) {
     const s = b.start; const [x, y] = toPx((s.c + 0.5) * CELL, (s.r + 0.5) * CELL);
     ctx.save(); ctx.translate(x, y); ctx.rotate(((DIRS[s.dir] ?? 0) * Math.PI) / 180);
     ctx.fillStyle = 'rgba(0,0,0,0.12)';
@@ -343,3 +345,22 @@ export function drawStar(ctx, x, y, r, fill, stroke, lw = 2) {
 }
 
 export const ChallengeColors = COLORS;
+
+/**
+ * Legend for the parent guide: every board picture with what it is and what to do. Each sample is
+ * drawn with drawBoard from a tiny grid (`sample: true` skips the board checks); `setup` tweaks the
+ * arena state (painted, filled, open) so both states of a picture can be shown.
+ */
+export const BoardLegend = [
+  { title: 'Brick wall', grid: ['#.#'], text: 'The robot cannot drive through a wall or off the board. It bumps (crash star, bumper pressed), the move is cancelled and it settles back on its square; the program carries on with the next piece.' },
+  { title: 'Start arrow', grid: ['.S.'], dir: 'N', text: 'Where the robot begins and the way it faces. The robot goes back here every time Play is pressed.' },
+  { title: 'Star', grid: ['.*.'], text: 'Goal: drive onto it. It brightens when reached.' },
+  { title: 'Coin', grid: ['.o.'], text: 'Goal: drive over it to collect it (it disappears with a tick). Every coin on the board must be collected.' },
+  { title: 'Paint tile', grid: ['.R.'], text: 'Goal: stand on it while the bumper light is that colour (use the red or green light piece first). Grey middle = not painted yet.' },
+  { title: 'Painted tile', grid: ['.G.'], setup: (a) => { a.tiles[0].done = true; }, text: 'Done: the tile fills with its colour.' },
+  { title: 'Puck', grid: ['.r.'], text: 'A flat coloured disc. Magnet grab picks it up when it is straight in front of the robot (or under it); it then rides in front. The robot can drive over pucks without bumping.' },
+  { title: 'Box', grid: ['.1.'], text: 'Goal: drop the puck of the same colour into it. Stand next to it facing it (the puck in front of the robot is over the box) and use magnet let go.' },
+  { title: 'Filled box', grid: ['.2.'], setup: (a) => { a.pucks.push({ c: 1, r: 0, color: 'green', carried: false }); a.boxes[0].done = true; }, text: 'Done: the puck sits in the box with a tick.' },
+  { title: 'Door, shut', grid: ['.=.'], gate: { after: 1 }, text: 'A striped barrier with a red lamp is a wall. It opens when its rule is met: after a wait, when the bumper is pressed (tap the toy bumper or drive into the door to knock), or once every coin is collected.' },
+  { title: 'Door, open', grid: ['.=.'], gate: { after: 1 }, setup: (a) => { a.gateOpen = true; }, text: 'Green lamp: the door is open and the robot can drive through. One board has a door that shuts after a moment: use the speed piece to get through in time. The eye sees the lamp colour from the square in front of the door, so "wait to see green" works there.' },
+];

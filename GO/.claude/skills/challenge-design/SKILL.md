@@ -131,6 +131,11 @@ API). If the solution needs more than ~12 pieces, the challenge is too hard for 
   `pk('program.challenge.<id>')`); the free-play program is stashed in `pk('program.free')` while a
   challenge is open and restored on the Build tab.
 
+The parent guide's "Challenge pictures" section is generated from `BoardLegend` in challenge.js:
+one entry per picture and per visible state (shut/open door, empty/filled box, plain/painted
+tile), each a tiny `sample: true` grid drawn by `drawBoard` plus a grown-up sentence on what it is
+and what to do. Every new symbol or state gets an entry there in the same change.
+
 ## 7. Browser check (after `npm test`)
 
 Open the Challenge tab, pick the new card, confirm the board fits the window with squares equal to
