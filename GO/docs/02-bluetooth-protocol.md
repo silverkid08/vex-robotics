@@ -133,7 +133,9 @@ A robot command is a uint32 `cmd | arg1 << 8 | arg2 << 16 | arg3 << 24` written 
 | `MAG_HOLD port power` | `84` CMD_P_HOLD | u8 @8, i8 @16 | Continuous, −100…100; 0 stops. |
 | `SET_SWITCH_LED port power` | `85` CMD_P_SET_LED | u8 @8, i16 @16 | LED bumper colour: **+ = green, − = red, 0 = off**, magnitude = brightness %. |
 
-### Eye sensor (built into the brain)
+### Eye sensor (handled by the brain's sensor service, not a port device)
+
+The Eye Sensor is a separate part on the brain's dedicated blue-green Eye port (see [11](11-vex-go-electronics.md)); the brain exposes it through its own sensor commands and status packet rather than as a numbered Smart Port device.
 
 | Script line | Opcode | Layout |
 |---|---|---|

@@ -28,7 +28,7 @@ No dependencies, no bundler, ES modules. Default mode is the pretend robot (SimB
 - `app/js/simview.js` — pretend-robot canvas, `predictPath()`, speed and size controls, arena (challenge board) rendering.
 - `app/js/challenges.js` — challenge catalogue (text grids, `par`, hints); `app/js/challenge.js` — `Arena` (board physics, objectives, gates, pucks, drawing). Challenge mode is simulator-only; see docs/10 and the `challenge-design` skill.
 - `app/js/icons.js` — every SVG picture; `app/js/sound.js` — blips.
-- `docs/` — 00–09 numbered documentation (index in docs/README.md). `tests/` — encoder golden vectors, parsers, simulator runs, path prediction.
+- `docs/` — 01–15 numbered documentation (index in docs/README.md); 11–15 are the VEX GO hardware, kit, glossary and ecosystem reference. `tests/` — encoder golden vectors, parsers, simulator runs, path prediction.
 - `.claude/skills/` — `vex-go-ble-protocol`, `add-puzzle-piece`, `run-kid-app`, `refresh-vexcode-analysis`, `kid-ui-guidelines`, `new-gui-function` (the owner's settled design decisions, the mock-and-choose workflow and the list of candidate functions), `challenge-design` (boards, legend, physics, par/grade, the mandatory solution test). Load the relevant one before touching protocol code, pieces, challenges, or anything the child sees.
 
 ## Conventions

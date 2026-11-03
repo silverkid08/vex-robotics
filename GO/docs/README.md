@@ -16,6 +16,13 @@ Everything in the "how VEXcode GO works" documents was derived from the publicly
 | 08 | [Xbox controller](08-xbox-controller.md) | Gamepad API mapping used by the app. |
 | 09 | [Developer setup](09-dev-setup.md) | Running the app, tests, simulator, browser requirements, project layout, adding pieces. |
 | 10 | [Challenge mode and profiles](10-challenge-mode.md) | The trophy tab: boards, legend, physics, star grade, the solution tests; child profiles and their storage keys. |
+| 11 | [VEX GO electronics](11-vex-go-electronics.md) | Brain, Battery, Switch, Smart Motor, Eye Sensor, LED Bumper, Electromagnet: SKUs, ports, specs, firmware, cables, default port map, GO vs IQ vs 123. |
+| 12 | [VEX GO structural parts](12-vex-go-structural-parts.md) | The 12.7 mm pitch system, colour = size, square vs round, every beam/pin/shaft/gear/wheel family with kit quantities and part numbers, Parts Packs, poster and ruler. |
+| 13 | [VEX GO kits and builds](13-vex-go-kits-and-builds.md) | Kits, bundles and SKUs; the build catalogue; Code Base bill of materials and geometry (160 mm/rev, 135 mm track); Code Base 2.0; VEXcode port maps. |
+| 14 | [VEX GO glossary](14-vex-go-glossary.md) | A–Z of VEX's own terms, plus the phrases that are *not* VEX vocabulary. |
+| 15 | [VEX GO ecosystem](15-vex-go-ecosystem.md) | The VEX Continuum, VEXcode GO platforms and UI vocabulary, block categories, robot configuration, STEM Labs, VEX Classroom, PD+, the VEX GO Competition, safety and warranty. |
+
+Documents 11–15 are a hardware and terminology reference compiled from the VEX Library, product pages and api.vex.com on 2026-11-03; anything VEX does not publish is marked as such inside each file.
 
 Quick start for grown-ups:
 
