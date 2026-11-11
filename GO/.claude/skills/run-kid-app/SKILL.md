@@ -8,13 +8,17 @@ description: How to run, test and verify the VEX GO kid coder app (local server,
 ## Commands
 ```
 npm start      # node tools/serve.mjs → http://localhost:8080 (run in background)
-npm test       # node --test "tests/**/*.test.mjs"  (≈4 s; simulator tests use sim.speed = 8)
+npm run build  # node tools/build.mjs → dist/vex-go-kid-coder.html (single file, no server needed)
+npm test       # node --test "tests/**/*.test.mjs"  (≈1 min; fails if dist/ is stale)
 ```
-No install step; no bundler. If port 8080 is busy: `PORT=8090 node tools/serve.mjs`.
+No install step. If port 8080 is busy: `PORT=8090 node tools/serve.mjs`.
+
+**No-server edition.** When the owner wants the app without Node, or asks for the "single file", "double-click" or "USB" version: `npm run build`, then `Start-Process "dist\vex-go-kid-coder.html"`. Always rebuild after editing `app/` and commit the regenerated `dist/` file. Headless smoke check from Git Bash:
+`"/c/Program Files/Google/Chrome/Application/chrome.exe" --headless=new --disable-gpu --user-data-dir="$TEMP/vexgo-hl" --enable-logging=stderr --virtual-time-budget=4000 --dump-dom "file:///C:/source/vex-robotics/GO/dist/vex-go-kid-coder.html" > dom.html 2> err.txt` → `grep -c '<div class="piece' dom.html` ≈ 55 and `grep CONSOLE err.txt` empty.
 
 ## Modes
 * **Pretend robot (default):** `SimBrain` auto-connects; a toy-robot column on the right of the build tab shows the predicted route (dashed) and the live trail, with bigger/smaller window buttons, turtle/rabbit speed buttons (`sim.speed`), and buttons to press the bumper / show colours to the eye. Everything works offline. `predictPath()` (simview.js) is unit-tested in `tests/simview.test.mjs`.
-* **Real brain:** tap the Bluetooth button (or the toy/robot button in the gear panel). Requires Chrome/Edge ≥ 100, `http://localhost` or `https://`, brain on and not connected elsewhere. Mode is remembered in `localStorage['vexgo.mode']`.
+* **Real brain:** tap the Bluetooth button (or the toy/robot button in the gear panel). Requires Chrome/Edge ≥ 100, `http://localhost` or `https://` (a `file://` page may or may not be allowed, depending on the Chrome version), brain on and not connected elsewhere. Mode is remembered in `localStorage['vexgo.mode']`.
 
 ## Smoke test with Claude in Chrome (what to click)
 1. `tabs_context_mcp` → `navigate` to `http://localhost:8080/`, screenshot.

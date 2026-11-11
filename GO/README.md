@@ -38,20 +38,25 @@ Along the way we reverse-engineered how VEXcode GO actually talks to the brain a
 
 ## How to use it
 
-Requirements: Node 20+ for the tiny local server, and Chrome or Edge (Web Bluetooth). A VEX GO Brain with current firmware (update it once through codego.vex.com if it is old).
+Requirements: Chrome or Edge (Web Bluetooth) and a VEX GO Brain with current firmware (update it once through codego.vex.com if it is old). Node 20+ is only needed to develop or rebuild the app.
+
+**No install:** double-click `dist/vex-go-kid-coder.html`. It is the whole app in one file (HTML, CSS and JavaScript inlined) and opens straight from disk, a USB stick or a shared drive; nothing needs to be installed and no server runs. Rebuild it with `npm run build` after changing anything under `app/`.
+
+**Developing:**
 
 ```
 npm start        # serves ./app at http://localhost:8080
-npm test         # runs the unit tests
+npm run build    # writes dist/vex-go-kid-coder.html from app/
+npm test         # runs the unit tests (includes a check that dist/ is current)
 ```
 
-1. Open http://localhost:8080 in Chrome. The app starts in pretend-robot mode so you can try everything immediately.
+1. Open `dist/vex-go-kid-coder.html` (or http://localhost:8080 when developing) in Chrome. The app starts in pretend-robot mode so you can try everything immediately.
 2. To use the real robot: turn on the GO Brain, tap the round Bluetooth button (top right), pick the brain from Chrome's list. The robot face smiles when connected. The Code Base build (drivetrain on ports 1 and 4, LED bumper on 2, electromagnet on 3) is assumed.
 3. Build: tap or drag pieces into the row after the green flag, press ▶.
 4. Drive: steering-wheel tab, hold the arrows, or plug in a controller.
 5. First time with your child: open the parent guide (book button) and switch on helper words in the gear panel until they know the pictures.
 
-For a tablet on the same network you need HTTPS (Web Bluetooth refuses plain HTTP except localhost); copy the `app/` folder to any static HTTPS host or run a local HTTPS server with a self-signed certificate.
+For a tablet on the same network you need HTTPS (Web Bluetooth refuses plain HTTP except localhost); copy the `app/` folder (or just `dist/vex-go-kid-coder.html`) to any static HTTPS host or run a local HTTPS server with a self-signed certificate. Opening the file from disk is reliable for the pretend robot; whether Chrome allows Web Bluetooth from a `file://` page varies by version, so prefer localhost or HTTPS for the real brain.
 
 ## Documentation
 
@@ -82,7 +87,8 @@ app/          the web app (no build step): index.html, css/, js/
   js/icons.js     every picture (inline SVG)
 docs/         documentation
 tests/        node --test suites and VEX golden vectors
-tools/        static server
+dist/         vex-go-kid-coder.html, the single-file build (generated; open from disk)
+tools/        static server (serve.mjs) and the single-file bundler (build.mjs)
 .claude/      skills and guidance for Claude Code (see CLAUDE.md)
 ```
 

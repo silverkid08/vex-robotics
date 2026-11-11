@@ -2,16 +2,25 @@
 
 ## Requirements
 
-* Node ≥ 20 (tests use `node --test`, the server is dependency-free). No build step, no npm packages.
-* Chrome or Edge (Web Bluetooth). Firefox/Safari can run the simulator only.
+* To **use** the app: nothing but Chrome or Edge (Web Bluetooth). Firefox/Safari can run the simulator only. Open `dist/vex-go-kid-coder.html` from disk.
+* To **develop** it: Node ≥ 20 (tests use `node --test`, the server and the bundler are dependency-free). No npm packages.
 * A VEX GO Brain with current firmware (update once via https://codego.vex.com if the brain is old).
 
 ## Run
 
 ```
 npm start        # http://localhost:8080  (serves ./app; localhost counts as a secure context)
-npm test         # node --test tests/**/*.test.mjs
+npm run build    # dist/vex-go-kid-coder.html: the whole app in one file that opens from disk
+npm test         # node --test tests/**/*.test.mjs  (also fails if dist/ is older than app/)
 ```
+
+### The single-file build
+
+`app/index.html` loads `js/app.js` as an ES module. Chrome fetches module scripts with CORS, and a `file://` page has a null origin, so double-clicking `index.html` gives *"Access to script … has been blocked by CORS policy"* and an empty page. `tools/build.mjs` fixes that without adding a dependency: it walks the import graph from `app.js`, wraps each module in `const __m_<name> = (() => { … return { exports }; })();` in dependency order, rewrites `import { a } from './x.js'` to `const { a } = __m_x;`, and inlines the resulting classic script plus `style.css` into a copy of `index.html`. The output is deterministic and committed, so the owner never needs Node; `tests/build.test.mjs` compares it against a fresh build and fails with "run `npm run build`" when the sources moved on.
+
+The bundler is intentionally narrow. Only `import { a, b as c } from './x.js'` and `export const|let|var|function|async function|class NAME` are translated; default exports, `export { … }` lists, re-exports, dynamic `import()`, `import.meta` and circular imports make it throw. Exported `let` bindings are copied, not live, so do not export mutable state (nothing does today).
+
+Web Bluetooth from a `file://` page is not something to rely on across Chrome versions; the single file is for the simulator and the challenges, and for carrying the app around. For the real brain use localhost or HTTPS.
 
 For a tablet on the same Wi-Fi you need HTTPS (Web Bluetooth refuses plain http except localhost). Easiest: `npx http-server app -S -C cert.pem -K key.pem` with a self-signed cert, or deploy the `app/` folder to any static HTTPS host (GitHub Pages works).
 
@@ -64,7 +73,7 @@ docs/                 this documentation
 
 ## Conventions
 
-* ES modules, no bundler, no framework. Keep files small and documented at the top.
+* ES modules, no framework, no third-party bundler (only our ~150-line `tools/build.mjs`, which needs the plain import/export forms listed above). Keep files small and documented at the top.
 * Script lines (`"DRIVE_FOR 338 25"`) are the single source of truth for robot actions; never hand-pack bytes elsewhere.
 * Firmware ports are 0-based everywhere in code; docs say "Port 2 (firmware 1)" when it matters.
 * Anything a child sees must be an SVG from `icons.js`.

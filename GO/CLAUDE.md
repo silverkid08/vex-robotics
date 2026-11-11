@@ -9,10 +9,27 @@ Key technical fact (docs/01, docs/02): VEXcode GO never compiles or downloads an
 ## Run / test
 
 ```
-npm start   # node tools/serve.mjs → http://localhost:8080 (run in background)
-npm test    # node --test tests/**/*.test.mjs  (~4 s)
+npm start       # node tools/serve.mjs → http://localhost:8080 (run in background)
+npm run build   # node tools/build.mjs → dist/vex-go-kid-coder.html (single file, opens from disk)
+npm test        # node --test tests/**/*.test.mjs  (~1 min; fails if dist/ is stale)
 ```
-No dependencies, no bundler, ES modules. Default mode is the pretend robot (SimBrain); the Bluetooth button switches to a real brain (Chrome/Edge, localhost or HTTPS).
+No dependencies, ES modules in `app/`. Default mode is the pretend robot (SimBrain); the Bluetooth button switches to a real brain (Chrome/Edge, localhost or HTTPS).
+
+Two ways to run it. The dev server serves `app/` as-is. The **single-file build** `dist/vex-go-kid-coder.html` is the no-install edition for the owner: `tools/build.mjs` (dependency-free, ~150 lines) concatenates the modules into one classic script and inlines it with the CSS into index.html, because Chrome blocks `<script type="module">` on `file://` pages. `dist/` is committed so the file works on a machine without Node. **After any change under `app/`, run `npm run build`** and commit the regenerated file; `tests/build.test.mjs` fails otherwise. The bundler only understands `import { a, b } from './x.js'` and `export const|let|var|function|class NAME` (no default exports, export lists, re-exports, `import()`, `import.meta`); it throws on anything else, so keep to those forms.
+
+### Launching the app (when asked to "run", "launch", "start" or "open" it)
+
+All commands run from this `GO/` folder (the repo root `C:\source\vex-robotics` has no package.json).
+
+1. Start the static server **in the background** (it never exits on its own):
+   `node tools/serve.mjs` (or `npm start`). It prints `VEX GO kid coder: http://localhost:8080/` and binds to 127.0.0.1 only.
+   Port busy → `PORT=8090 node tools/serve.mjs` (PowerShell: `$env:PORT=8090; node tools/serve.mjs`).
+2. Open it for the owner (Windows): `Start-Process "http://localhost:8080/"` in PowerShell. Chrome or Edge is needed for Web Bluetooth; any browser works for the pretend robot.
+3. Leave the server running; the owner stops it (or it dies with the session). The server has no build step, so edits to `app/` show on reload (`Cache-Control: no-store`).
+
+Launching is just these steps: no tests, no curl check, no browser smoke test unless the owner asks for one.
+
+If the owner asks for the **no-server / single-file / double-click** version instead: `npm run build`, then `Start-Process "dist\vex-go-kid-coder.html"` (opens in the default browser). Headless check when needed: `chrome --headless=new --dump-dom "file:///C:/source/vex-robotics/GO/dist/vex-go-kid-coder.html"` should contain ~55 `<div class="piece` and no CONSOLE errors.
 
 ## Layout
 
@@ -28,6 +45,7 @@ No dependencies, no bundler, ES modules. Default mode is the pretend robot (SimB
 - `app/js/simview.js` — pretend-robot canvas, `predictPath()`, speed and size controls, arena (challenge board) rendering.
 - `app/js/challenges.js` — challenge catalogue (text grids, `par`, hints); `app/js/challenge.js` — `Arena` (board physics, objectives, gates, pucks, drawing). Challenge mode is simulator-only; see docs/10 and the `challenge-design` skill.
 - `app/js/icons.js` — every SVG picture; `app/js/sound.js` — blips.
+- `tools/serve.mjs` — dev server; `tools/build.mjs` — single-file bundler → `dist/vex-go-kid-coder.html` (generated, committed; see Run / test).
 - `docs/` — 01–15 numbered documentation (index in docs/README.md); 11–15 are the VEX GO hardware, kit, glossary and ecosystem reference. `tests/` — encoder golden vectors, parsers, simulator runs, path prediction.
 - `.claude/skills/` — `vex-go-ble-protocol`, `add-puzzle-piece`, `run-kid-app`, `refresh-vexcode-analysis`, `kid-ui-guidelines`, `new-gui-function` (the owner's settled design decisions, the mock-and-choose workflow and the list of candidate functions), `challenge-design` (boards, legend, physics, par/grade, the mandatory solution test). Load the relevant one before touching protocol code, pieces, challenges, or anything the child sees.
 
@@ -38,7 +56,7 @@ No dependencies, no bundler, ES modules. Default mode is the pretend robot (SimB
 - Firmware ports are 0-based in code (Code Base: bumper 1, magnet 2, drivetrain = virtual port 4).
 - Colour families are fixed (see `Groups` in pieces.js). Piece ids are stored in saved programs: never rename, only add.
 - `_afterLayout()` in editor.js redraws repeat frames and wrap arrows after any DOM change; call it if you add layout-affecting features.
-- Run `npm test` after changes to encoder/ble/robot/sim/runner/pieces/simview/challenge(s) (~1 min: the challenge suite runs every board). Every challenge needs a solution in `tests/fixtures/challenge-solutions.mjs` whose first entry has exactly `par` pieces. Verify UI changes in Chrome in both reading directions and at min/max zoom (the `run-kid-app` skill lists the clicks).
+- Run `npm run build` after any change under `app/` (the single-file edition must stay current), then `npm test` after changes to encoder/ble/robot/sim/runner/pieces/simview/challenge(s) (~1 min: the challenge suite runs every board). Every challenge needs a solution in `tests/fixtures/challenge-solutions.mjs` whose first entry has exactly `par` pieces. Verify UI changes in Chrome in both reading directions and at min/max zoom (the `run-kid-app` skill lists the clicks).
 - Keep docs in sync: new piece → docs/03 + docs/07; protocol change → docs/02 + the protocol skill; design rule change → docs/07 + `kid-ui-guidelines`; challenge or board rule → docs/10 + `challenge-design`.
 - Storage is per child: program/progress keys go through `pk()` in app.js (`vexgo.<profileId>.…`); only device/grown-up settings are global.
 - Write code files with the Write/Edit tools; the Bash tool collapses `\\` in heredocs.

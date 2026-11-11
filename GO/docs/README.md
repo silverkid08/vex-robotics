@@ -26,9 +26,12 @@ Documents 11–15 are a hardware and terminology reference compiled from the VEX
 
 Quick start for grown-ups:
 
+No install: open `dist/vex-go-kid-coder.html` in Chrome or Edge (the whole app in one file). For development:
+
 ```
 npm start            # serves ./app at http://localhost:8080
-npm test             # unit tests (encoder golden vectors, parsers, simulator runs)
+npm run build        # regenerates dist/vex-go-kid-coder.html from app/
+npm test             # unit tests (encoder golden vectors, parsers, simulator runs, dist freshness)
 ```
 
-Open http://localhost:8080 in Chrome or Edge, tap the Bluetooth button, pick the GO brain, and press play.
+Open the file or http://localhost:8080 in Chrome or Edge, tap the Bluetooth button, pick the GO brain, and press play.
