@@ -37,6 +37,9 @@ const FORBIDDEN = [
 ];
 
 const varName = (file) => '__m_' + basename(file, '.js').replace(/[^\w$]/g, '_');
+// Git on Windows may check the sources out with CRLF; the build is always LF so the
+// output does not depend on the machine (tests/build.test.mjs compares it byte for byte).
+const readText = async (path) => (await readFile(path, 'utf8')).replace(/\r\n?/g, '\n');
 
 /** Parse one module's source into its dependencies, exports and export-stripped body. */
 export function analyseModule(file, source) {
@@ -65,7 +68,7 @@ export async function loadGraph(entry = ENTRY, appDir = APP_DIR) {
   async function visit(file, stack) {
     if (mods.has(file)) return;
     if (stack.includes(file)) throw new Error(`circular import: ${[...stack, file].join(' -> ')}`);
-    const source = await readFile(join(appDir, file), 'utf8');
+    const source = await readText(join(appDir, file));
     const mod = analyseModule(file, source);
     for (const imp of mod.imports) await visit(imp.file, [...stack, file]);
     mods.set(file, mod); // inserted after its dependencies => Map order is topological
@@ -108,8 +111,8 @@ export function bundleModules(mods, entry = ENTRY) {
 /** Build the standalone page. Pure: reads app/, returns strings, writes nothing. */
 export async function build({ appDir = APP_DIR, entry = ENTRY } = {}) {
   const [html, css, mods] = await Promise.all([
-    readFile(join(appDir, 'index.html'), 'utf8'),
-    readFile(join(appDir, 'css/style.css'), 'utf8'),
+    readText(join(appDir, 'index.html')),
+    readText(join(appDir, 'css/style.css')),
     loadGraph(entry, appDir),
   ]);
   const { js, parts } = bundleModules(mods, entry);

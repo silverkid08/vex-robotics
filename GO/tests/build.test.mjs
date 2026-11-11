@@ -46,8 +46,9 @@ test('bundler rejects module syntax it cannot translate', () => {
 });
 
 test('dist/vex-go-kid-coder.html is up to date (run `npm run build` after editing app/)', async () => {
-  const onDisk = await readFile(DIST_FILE, 'utf8').catch(() => null);
-  assert.ok(onDisk !== null, 'dist/vex-go-kid-coder.html is missing: run `npm run build`');
+  const raw = await readFile(DIST_FILE, 'utf8').catch(() => null);
+  assert.ok(raw !== null, 'dist/vex-go-kid-coder.html is missing: run `npm run build`');
+  const onDisk = raw.replace(/\r\n?/g, '\n'); // git may have checked it out with CRLF
   assert.equal(onDisk.length, built.html.length, 'dist page is stale: run `npm run build`');
   assert.ok(onDisk === built.html, 'dist page is stale: run `npm run build`');
 });
